@@ -26,7 +26,7 @@ variable "instance-type" {
 
 variable "keypair" {
   type    = string
-  default = "keypair1"
+  default = "jenkins-sonar"
 }
 
 variable "jenkins-tags" {
@@ -63,4 +63,3 @@ variable "enable_classiclink_dns_support" {
   type        = bool
   default     = null
 }
-

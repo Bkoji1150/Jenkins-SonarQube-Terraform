@@ -1,46 +1,40 @@
-# EC2.tf
+terraform {
+  required_version = ">=v0.13.2"
+}
 
-/*
-data "aws_ami" "example" {
-  most_recent      = true
-  owners           = ["309956199498"]
 
-  filter {
-    name   = "name"
-    values = var.datavalue
+
+resource "aws_ssm_parameter" "cloud_agent" {
+
+  name        = "jenkins"
+  description = "Value for the aws cloudwatch agent on jenkins agents"
+  type        = "String"
+  tier        = "Standard"
+  data_type   = "text"
+  value       = file("./cloudwatch-config.json")
+  tags = {
+    Name = "cloudwatch_agent"
   }
-}*/
-
+}
 
 resource "aws_instance" "jenkinsinstance" {
   count                  = var.private-subnet-count
-  ami                    = "ami-002068ed284fb165b" #data.aws_ami.example.id TODO
+  ami                    = "ami-002068ed284fb165b" #data.aws_ami.example.id TODO ami-002068ed284fb165b 
   instance_type          = var.instance-type
   subnet_id              = aws_subnet.fleur-public-subnet[0].id
   vpc_security_group_ids = [aws_security_group.fleur-public-security-group.id]
   key_name               = var.keypair
-  user_data              = <<EOF
-#!/bin/bash
-cd /home/ec2-user
-sudo yum install java-1.8* -y
-sudo yum install wget -y
-sudo yum install git -y
-sudo yum install epel-release java-11-openjdk-devel
-sudo amazon-linux-extras install epel
-sudo wget -O /etc/yum.repos.d/jenkins.repo https://pkg.jenkins.io/redhat-stable/jenkins.repo
-sudo rpm --import https://pkg.jenkins.io/redhat-stable/jenkins.io.key
-sudo yum install jenkins -y
-# Start jenkins service
-sudo systemctl start jenkins
-# Setup Jenkins to start at boot
-sudo systemctl enable jenkins
-cd /home/ec2-user
-ls -hart
-EOF
+  user_data = base64encode(
+    templatefile("${path.cwd}/template.tpl",
+      {
+        vars = []
+    })
+  )
   tags = {
     Name = var.jenkins-tags[count.index]
   }
 }
+
 
 resource "aws_instance" "SonarQubesinstance" {
   ami                    = "ami-002068ed284fb165b" #data.aws_ami.example.id TODO
@@ -48,24 +42,12 @@ resource "aws_instance" "SonarQubesinstance" {
   subnet_id              = aws_subnet.fleur-public-subnet[0].id
   vpc_security_group_ids = [aws_security_group.fleur-public-security-group.id]
   key_name               = var.keypair
-  user_data              = <<EOF
-#!/bin/bash
-cd /home/ec2-user
-sudo yum install java-1.8* -y
-sudo yum install wget -y
-sudo yum install git -y
-sudo yum install epel-release java-11-openjdk-devel
-sudo amazon-linux-extras install epel
-sudo wget -O /etc/yum.repos.d/jenkins.repo https://pkg.jenkins.io/redhat-stable/jenkins.repo
-sudo rpm --import https://pkg.jenkins.io/redhat-stable/jenkins.io.key
-sudo yum install jenkins -y
-# Start jenkins service
-sudo systemctl start jenkins
-# Setup Jenkins to start at boot
-sudo systemctl enable jenkins
-cd /home/ec2-user
-ls -hart
-EOF
+  user_data = base64encode(
+    templatefile("${path.cwd}/sonar.tpl",
+      {
+        vars = []
+    })
+  )
   tags = {
     Name = "SonarQubesinstance"
   }

@@ -1,17 +1,17 @@
 data "aws_availability_zones" "fleur-zone" {}
 
 resource "aws_vpc" "fleur-vpc" {
-   count = var.create_vpc ? 1 : 0 
+  count                          = var.create_vpc ? 1 : 0
   cidr_block                     = var.fleur-cidr-block
   enable_dns_hostnames           = var.enable_dns_hostnames
   enable_dns_support             = var.enable_dns_support
   enable_classiclink             = var.enable_classiclink
   enable_classiclink_dns_support = var.enable_classiclink_dns_support
 
-  tags =  merge(
-   {
-    Name = format("%s","fleur-vpc")
-  }
+  tags = merge(
+    {
+      Name = format("%s", "fleur-vpc")
+    }
   )
   lifecycle {
     create_before_destroy = true
@@ -117,7 +117,7 @@ resource "aws_security_group" "fleur-public-security-group" {
       to_port          = foo.value.to_port
       protocol         = foo.value.protocol
       cidr_blocks      = foo.value.cidr_blocks
-      ipv6_cidr_blocks = ["::/0"]
+      ipv6_cidr_blocks = foo.value.ipv6_cidr_blocks
     }
   }
 
