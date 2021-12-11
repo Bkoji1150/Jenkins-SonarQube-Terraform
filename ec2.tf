@@ -1,8 +1,3 @@
-terraform {
-  required_version = ">=v0.13.2"
-}
-
-
 
 resource "aws_ssm_parameter" "cloud_agent" {
 
@@ -18,7 +13,7 @@ resource "aws_ssm_parameter" "cloud_agent" {
 }
 
 resource "aws_instance" "jenkinsinstance" {
-  count                  = var.private-subnet-count
+  count               = 2
   ami                    = "ami-002068ed284fb165b" #data.aws_ami.example.id TODO ami-002068ed284fb165b 
   instance_type          = var.instance-type
   subnet_id              = aws_subnet.fleur-public-subnet[0].id
@@ -30,8 +25,24 @@ resource "aws_instance" "jenkinsinstance" {
         vars = []
     })
   )
+  root_block_device {
+    volume_size = var.vol_size
+  }
+  # provisioner local-exec {
+  #   command = templatefile("${path.cwd}/template.tpl",
+  #     {
+  #       vars = []
+  #   })
+  # }
   tags = {
     Name = var.jenkins-tags[count.index]
+  }
+  lifecycle {
+    ignore_changes = [
+      # Ignore changes to tags, e.g. because a management agent
+      # updates these based on some ruleset managed elsewhere.
+      user_data,
+    ]
   }
 }
 
@@ -48,6 +59,9 @@ resource "aws_instance" "SonarQubesinstance" {
         vars = []
     })
   )
+  root_block_device {
+    volume_size = var.vol_size
+  }
   tags = {
     Name = "SonarQubesinstance"
   }

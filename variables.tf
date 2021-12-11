@@ -31,7 +31,7 @@ variable "keypair" {
 
 variable "jenkins-tags" {
   type    = list(string)
-  default = ["jenkins-agen1", "jenkins-agen2"]
+  default = ["Master-node", "agen1"]
 }
 
 variable "create_vpc" {
@@ -44,6 +44,11 @@ variable "enable_dns_hostnames" {
   description = "Should be true to enable DNS hostnames in the VPC"
   type        = bool
   default     = false
+}
+
+variable vol_size {
+  type = number 
+  default = 100
 }
 
 variable "enable_dns_support" {
@@ -62,4 +67,19 @@ variable "enable_classiclink_dns_support" {
   description = "Should be true to enable ClassicLink DNS Support for the VPC. Only valid in regions and accounts that support EC2 Classic."
   type        = bool
   default     = null
+}
+
+variable region {
+  type = string 
+  default = "us-east-2"
+}
+
+variable sonar_port {
+  type = number
+  default = 9000
+}
+
+variable jenkins_port {
+  type = number
+  default = 8080
 }

@@ -24,3 +24,6 @@ sudo pip3 install awscli boto3 botocore --upgrade --user
 sudo pip install awscli boto3 botocore --upgrade --user
 export PATH=/usr/local/bin:$PATH
 ls -hart
+
+jenkins tokens 
+xoxb-2847899152736-2809566121911-7WrivUCeXkurOtfC2CuOupZu

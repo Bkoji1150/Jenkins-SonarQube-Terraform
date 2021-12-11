@@ -15,8 +15,27 @@ sudo yum install git -y
 sudo yum install python
 sudo yum install python-pip
 pip3 install ansible
-ansible --version
+# Installing Docker 
+yum install docker -y
+service docker start
+service docker status
+sudo useradd dockeradmin
+sudo passwd dockeradmin
+sudo usermod -aG docker dockeradmin
+# Installing maven
+sudo su
+mkdir /opt/maven
+cd /opt/maven
+wget https://dlcdn.apache.org/maven/maven-3/3.8.4/binaries/apache-maven-3.8.4-bin.tar.gz
+tar -xvzf apache-maven-3.8.4-bin.tar.gz
+cat >> ~/.bash_profile 
+JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk-1.8.0.302.b08-0.amzn2.0.1.x86_64
+M2_HOME=/opt/maven/apache-maven-3.8.4
+M2=$M2_HOME/bin
+PATH=$PATH:$HOME/bin:$M2_HOME:$M2:$JAVA_HOME 
 sudo useradd ansible
+sudo useradd jenkins
+sudo -u jenkins mkdir /home/jenkins.ssh
 # sudo echo "ansible ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers
 sudo mkdir -p /var/ansible/cw-misc-jenkins-agents-misc-ans
 sudo yum -y install git ansible python3-pip
