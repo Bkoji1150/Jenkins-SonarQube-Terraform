@@ -25,5 +25,7 @@ sudo pip install awscli boto3 botocore --upgrade --user
 export PATH=/usr/local/bin:$PATH
 ls -hart
 
-jenkins tokens 
-xoxb-2847899152736-2809566121911-7WrivUCeXkurOtfC2CuOupZu
+#slack tokens for jenkins
+# xoxb-2847899152736-2809566121911-7WrivUCeXkurOtfC2CuOupZu
+
+# getting enviromental variable
