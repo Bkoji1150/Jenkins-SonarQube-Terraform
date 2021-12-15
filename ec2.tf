@@ -18,7 +18,8 @@ resource "aws_ssm_parameter" "cloud_agent" {
 
 resource "aws_instance" "jenkinsinstance" {
   count         = 2
-  ami           = "ami-002068ed284fb165b" #data.aws_ami.example.id TODO ami-002068ed284fb165b 
+  ami           = "ami-002068ed284fb165b" #data.aws_ami.example.id TODO ami-002068ed284fb165b
+  monitoring = true
   instance_type = var.instance-type
   # iam_instance_profile = "Jenkins_agents_admin_role"
   subnet_id              = aws_subnet.fleur-public-subnet[0].id

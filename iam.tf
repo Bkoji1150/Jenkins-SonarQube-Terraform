@@ -1,23 +1,3 @@
-# resource "aws_secretsmanager_secret_policy" "example" {
-#   secret_arn = aws_secretsmanager_secret.example.arn
-
-#   policy = <<POLICY
-# {
-#   "Version": "2012-10-17",
-#   "Statement": [
-#     {
-#       "Sid": "EnableAllPermissions",
-#       "Effect": "Allow",
-#       "Principal": {
-#         "AWS": "*"
-#       },
-#       "Action": "secretsmanager:GetSecretValue",
-#       "Resource": "*"
-#     }
-#   ]
-# }
-# POLICY
-# }
 
 data "aws_iam_policy_document" "policy_document" {
   statement {

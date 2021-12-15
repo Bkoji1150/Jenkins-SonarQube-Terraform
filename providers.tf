@@ -1,12 +1,7 @@
 provider "aws" {
   region = var.region
-  # assume_role {
-  #   role_arn = "${var.account_role}"
-  #   session_name = "Terraform_build_role"
   profile = "default"
-  # default_tags {
-  #    tags = local.default_tags
-  #  }
+
 }
 
 
