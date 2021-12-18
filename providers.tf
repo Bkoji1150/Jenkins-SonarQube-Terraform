@@ -1,7 +1,6 @@
 provider "aws" {
-  region = var.region
+  region  = var.region
   profile = "default"
-
 }
 
 
@@ -27,6 +26,5 @@ terraform {
       source = "terraform-providers/postgresql"
     }
   }
-
-  required_version = ">= 0.13"
+  # required_version = ">= 0.13"
 }

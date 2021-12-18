@@ -1,7 +1,7 @@
 variable "db_subnet_group_name" {
-  type = bool 
+  type    = bool
   default = true
-  }
+}
 variable "public_sg" {}
 variable "public_subnets" {}
 variable "tg_port" {}

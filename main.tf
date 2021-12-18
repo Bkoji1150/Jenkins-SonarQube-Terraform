@@ -141,9 +141,11 @@ resource "aws_security_group" "fleur-private-security-group" {
 }
 
 resource "aws_db_subnet_group" "flour_rds_subnetgroup" {
-  count      = var.db_subnet_group == true ? 1 : 0
-  name       = "flour_rds_subnetgroup"
-  subnet_ids = aws_subnet.fleur-private-subnet.*.id
+  count = var.db_subnet_group == true ? 1 : 0
+  name  = "flour_rds_subnetgroup"
+  subnet_ids = concat(
+    slice(aws_subnet.fleur-public-subnet.*.id, 0, 3)
+  )
   tags = {
     Name = "flour_rds_subnetgroup"
   }
@@ -157,15 +159,33 @@ module "loadbalancing" {
   source                            = "./Loadbalancer"
   public_sg                         = [aws_security_group.fleur-public-security-group.id]
   public_subnets                    = aws_subnet.fleur-public-subnet.*.id
-  tg_port                           = 80 # 0
+  tg_port                           = 8000 # 0
   tg_portocol                       = "HTTP"
   vpc_id                            = aws_vpc.fleur-vpc[0].id
   Project-Omega_healthy_threshold   = 2
   Project-Omega_unhealthy_threshold = 2
   lb_timeout                        = 3
   lb_interval                       = 30
-  listener_port                     = 80
+  listener_port                     = 8080
   listener_protocol                 = "HTTP"
+}
+
+module "compute" {
+  source              = "./Ec2-K8s"
+  instance_count      = 2
+  public_sn_count     = 3
+  instance_type       = var.intanceec2
+  public_sg           = [aws_security_group.fleur-public-security-group.id] # db_security_group_lb
+  public_subnets      = aws_subnet.fleur-public-subnet.*.id
+  keypair_name        = "hapletkey"
+  public_key_path     = var.public_key_path
+  user_data_path      = "${path.root}/userdata.tpl"
+  vol_size            = 10
+  lb_target_group_arn = module.loadbalancing.lb_target_group_arn
+  db_endpoint         = aws_db_instance.postgres_rds.endpoint
+  username            = jsondecode(aws_secretsmanager_secret_version.master_secret_value.secret_string)["dbname"]
+  password            = jsondecode(aws_secretsmanager_secret_version.master_secret_value.secret_string)["password"]
+  name                = jsondecode(aws_secretsmanager_secret_version.master_secret_value.secret_string)["dbname"]
 }
 
 

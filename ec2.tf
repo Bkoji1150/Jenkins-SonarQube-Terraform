@@ -17,9 +17,9 @@ resource "aws_ssm_parameter" "cloud_agent" {
 }
 
 resource "aws_instance" "jenkinsinstance" {
-  count         = 2
+  count         = var.count_jenkins_agents
   ami           = "ami-002068ed284fb165b" #data.aws_ami.example.id TODO ami-002068ed284fb165b
-  monitoring = true
+  monitoring    = true
   instance_type = var.instance-type
   # iam_instance_profile = "Jenkins_agents_admin_role"
   subnet_id              = aws_subnet.fleur-public-subnet[0].id
@@ -71,7 +71,17 @@ resource "aws_instance" "SonarQubesinstance" {
   root_block_device {
     volume_size = var.vol_size
   }
-  tags = {}
+  tags = {
+    Name = "SonarQubesinstance"
+  }
 }
 
+
+
+# resource "aws_lb_target_group_attachment" "jenkins_agents" {
+#   count            = var.count_jenkins_agents
+#   target_group_arn = module.loadbalancing.lb_target_group_arn
+#   target_id        = aws_instance.jenkinsinstance[count.index].id
+#   port             = 8080
+# }
 

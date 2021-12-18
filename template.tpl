@@ -58,4 +58,10 @@ sudo yum -y install git ansible python3-pip
 sudo pip3 install awscli boto3 botocore --upgrade --user
 sudo pip3 install awscli boto3 botocore --upgrade --user
 #export PATH=/usr/local/bin:$PATH
+# install taraform 
+sudo yum install -y yum-utils
+sudo yum-config-manager --add-repo https://rpm.releases.hashicorp.com/AmazonLinux/hashicorp.repo
+sudo yum -y install terraform
 ls -hart
+
+

@@ -11,7 +11,8 @@ data "aws_iam_policy_document" "policy_document" {
     ]
 
     resources = [
-      "*"
+
+      aws_db_instance.postgres_rds.arn
     ]
   }
 
@@ -25,7 +26,7 @@ data "aws_iam_policy_document" "policy_document" {
     ]
 
     resources = [
-      "*"
+      aws_db_instance.postgres_rds.arn
     ]
   }
 

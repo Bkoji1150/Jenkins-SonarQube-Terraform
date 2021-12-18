@@ -38,7 +38,7 @@ variable "create_vpc" {
 variable "enable_dns_hostnames" {
   description = "Should be true to enable DNS hostnames in the VPC"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable vol_size {
@@ -128,7 +128,7 @@ variable "multi_az" {
 }
 
 variable "db_users" {
-  default = ["appli_role"]
+  default = ["lots", "sprintbot", "cypress_app"]
 }
 
 variable db_users_privileges {
@@ -160,12 +160,21 @@ variable db_users_privileges {
   default = {}
 }
 
-variable "tenable_user" {
-  default = "postgres_aa2"
+variable "name_prefix" {
+  description = ""
+  type        = string
+  default     = "lots"
 }
 
-variable "db_user_password" {
-  default = ""
+variable "tenable_user" {
+  description = "RDS Teneble users"
+  type        = string
+  default     = "postgres_aa2"
+}
+
+variable "count_jenkins_agents" {
+  type    = number
+  default = 2
 }
 
 variable "db_clusters" {
@@ -173,10 +182,10 @@ variable "db_clusters" {
   description = "The AWS DB cluster reference"
   default = {
     engine     = "postgres"
-    name       = "kojips"
+    name       = "cypress_app"
     port       = 5432
-    dbname     = "kojiuser"
-    identifier = "postg"
+    dbname     = "cypress_app"
+    identifier = "postgres-sbx-dop"
   }
 }
 
@@ -188,10 +197,18 @@ variable "account_role" {
 }
 
 variable "db_initial_id" {
-  default = "hshsye"
+  default = "Blesses#default"
 }
 
 variable "jenkins-tags" {
   type    = list(string)
   default = ["Master-node", "agen1"]
+}
+
+variable "public_key_path" {
+
+}
+
+variable "intanceec2" {
+  default = "t3.micro"
 }
