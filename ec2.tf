@@ -75,12 +75,9 @@ resource "aws_instance" "SonarQubesinstance" {
   }
 }
 
-
-
 # resource "aws_lb_target_group_attachment" "jenkins_agents" {
 #   count            = var.count_jenkins_agents
 #   target_group_arn = module.loadbalancing.lb_target_group_arn
 #   target_id        = aws_instance.jenkinsinstance[count.index].id
 #   port             = 8080
 # }
-
