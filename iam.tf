@@ -1,4 +1,3 @@
-
 data "aws_iam_policy_document" "policy_document" {
   statement {
     effect = "Allow"
@@ -11,7 +10,6 @@ data "aws_iam_policy_document" "policy_document" {
     ]
 
     resources = [
-
       aws_db_instance.postgres_rds.arn
     ]
   }
@@ -46,72 +44,94 @@ resource "aws_iam_policy" "ec2_role" {
   policy = data.aws_iam_policy_document.policy_document.json
 }
 
-
-data "aws_iam_policy_document" "jenkins_agent_policy" {
-  statement {
-    sid       = "AllowSpecifics"
-    effect    = "Allow"
-    resources = [aws_instance.SonarQubesinstance.arn]
-    actions = [
-      "application-autoscaling:*",
-      "autoscaling:*",
-      "apigateway:*",
-      "cloudfront:*",
-      "cloudwatch:*",
-      "cloudformation:*",
-      "dax:*",
-      "dynamodb:*",
-      "ec2:*",
-      "ec2messages:*",
-      "ecr:*",
-      "ecs:*",
-      "elasticfilesystem:*",
-      "elasticache:*",
-      "elasticloadbalancing:*",
-      "es:*",
-      "events:*",
-      "iam:*",
-      "kms:*",
-      "lambda:*",
-      "logs:*",
-      "rds:*",
-      "route53:*",
-      "ssm:*",
-      "ssmmessages:*",
-      "s3:*",
-      "sns:*",
-      "sqs:*"
+resource "aws_iam_policy" "ec2_policy" {
+  name        = "ec2_policy"
+  path        = "/"
+  description = "Policy to provide permission to EC2"
+  # Terraform's "jsonencode" function converts a
+  # Terraform expression result to valid JSON syntax.
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow",
+        Action = [
+          "ssm:GetParameters",
+          "ssm:GetParameter"
+        ],
+        Resource = "*"
+      },
+      {
+        "Effect" : "Allow",
+        "Action" : [
+          "application-autoscaling:*",
+          "autoscaling:*",
+          "apigateway:*",
+          "cloudfront:*",
+          "cloudwatch:*",
+          "cloudformation:*",
+          "dax:*",
+          "dynamodb:*",
+          "ec2:*",
+          "ec2messages:*",
+          "ecr:*",
+          "ecs:*",
+          "elasticfilesystem:*",
+          "elasticache:*",
+          "elasticloadbalancing:*",
+          "es:*",
+          "events:*",
+          "iam:*",
+          "kms:*",
+          "lambda:*",
+          "logs:*",
+          "rds:*",
+          "route53:*",
+          "ssm:*",
+          "ssmmessages:*",
+          "s3:*",
+          "sns:*",
+          "sqs:*"
+        ],
+        "Resource" : concat([aws_instance.SonarQubesinstance.arn], [for i in aws_instance.jenkinsinstance[*] : i.arn])
+      }
     ]
-
-  }
-
-  statement {
-    sid       = "DenySpecifics"
-    effect    = "Deny"
-    resources = ["*"]
-    actions = [
-      "aws-marketplace-management:*",
-      "aws-marketplace:*",
-      "aws-portal:*",
-      "budgets:*",
-      "config:*",
-      "directconnect:*",
-      "ec2:*ReservedInstances*",
-      "iam:*Group*",
-      "iam:*Login*",
-      "iam:*Provider*",
-      "iam:*User*",
-    ]
-  }
+  })
 }
 
-resource "aws_iam_policy" "jenkins_agent_role" {
-  name   = "Jenkins_agents_admin_role"
-  path   = "/"
-  policy = data.aws_iam_policy_document.jenkins_agent_policy.json
+# Create a role
+# https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role
+resource "aws_iam_role" "ec2_role" {
+  name = "ec2_role"
+
+  # Terraform's "jsonencode" function converts a
+  # Terraform expression result to valid JSON syntax.
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Sid    = ""
+        Principal = {
+          Service = "ec2.amazonaws.com"
+        }
+      },
+    ]
+  })
 }
 
-# resource "aws_iam_instance_profile" "jenkins_agent_instance" {
-#     name = "jenkins_agent_instance"
-#     role = "${aws_iam_policy.jenkins_agent_role.name}"
-# }
+#Attach role to policy
+#https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy_attachment
+resource "aws_iam_policy_attachment" "ec2_policy_role" {
+  name       = "ec2_attachment"
+  roles      = [aws_iam_role.ec2_role.name]
+  policy_arn = aws_iam_policy.ec2_policy.arn
+}
+
+#Attach role to an instance profile
+#https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_instance_profile
+resource "aws_iam_instance_profile" "ec2_profile" {
+  name = "ec2_profile"
+  role = aws_iam_role.ec2_role.name
+}

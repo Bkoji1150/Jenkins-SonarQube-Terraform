@@ -15,7 +15,6 @@ resource "aws_vpc" "fleur-vpc" {
   }
 }
 
-
 resource "aws_subnet" "fleur-public-subnet" {
   count                   = var.public-subnet-count
   vpc_id                  = aws_vpc.fleur-vpc[0].id
@@ -23,9 +22,7 @@ resource "aws_subnet" "fleur-public-subnet" {
   availability_zone       = data.aws_availability_zones.fleur-zone.names[count.index]
   map_public_ip_on_launch = true
 
-
   lifecycle {
-
     create_before_destroy = true
   }
 }
@@ -55,31 +52,22 @@ resource "aws_route_table" "fleur-public-route-table" {
     cidr_block = "0.0.0.0/0"
     gateway_id = aws_internet_gateway.fleur-gateway.id
   }
-
-
 }
-
 
 resource "aws_route_table" "fleur-private-route-table" {
   vpc_id = aws_vpc.fleur-vpc[0].id
-
-
 }
-
 
 resource "aws_route_table_association" "fleur-public-rt-association" {
   count          = var.public-subnet-count
   subnet_id      = aws_subnet.fleur-public-subnet.*.id[count.index]
   route_table_id = aws_route_table.fleur-public-route-table.id
-
 }
-
 
 resource "aws_route_table_association" "fleur-private-rt-association" {
   count          = var.private-subnet-count
   subnet_id      = aws_subnet.fleur-private-subnet.*.id[count.index]
   route_table_id = aws_route_table.fleur-private-route-table.id
-
 }
 
 resource "aws_security_group" "fleur-public-security-group" {
@@ -112,7 +100,6 @@ resource "aws_security_group" "fleur-public-security-group" {
     }
   }
 
-
   lifecycle {
     create_before_destroy = true
   }
@@ -135,9 +122,7 @@ resource "aws_security_group" "fleur-private-security-group" {
       cidr_blocks = pr.value.cidr_blocks
     }
   }
-
   tags = {}
-
 }
 
 resource "aws_db_subnet_group" "flour_rds_subnetgroup" {
@@ -153,7 +138,6 @@ resource "aws_db_subnet_group" "flour_rds_subnetgroup" {
     create_before_destroy = true
   }
 }
-
 
 module "loadbalancing" {
   source                            = "./Loadbalancer"
@@ -172,7 +156,7 @@ module "loadbalancing" {
 
 module "compute" {
   source              = "./Ec2-K8s"
-  instance_count      = 2
+  instance_count      = 0
   public_sn_count     = 3
   instance_type       = var.intanceec2
   public_sg           = [aws_security_group.fleur-public-security-group.id] # db_security_group_lb
@@ -187,13 +171,3 @@ module "compute" {
   password            = jsondecode(aws_secretsmanager_secret_version.master_secret_value.secret_string)["password"]
   name                = jsondecode(aws_secretsmanager_secret_version.master_secret_value.secret_string)["dbname"]
 }
-
-
-
-
-
-
-
-
-
-

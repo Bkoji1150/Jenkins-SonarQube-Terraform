@@ -3,10 +3,8 @@ provider "aws" {
   profile = "default"
 }
 
-
-
 terraform {
-  required_version = ">=v0.13.2"
+  required_version = "v1.1.3"
 
   backend "s3" {
     region  = "us-east-2"
@@ -15,7 +13,6 @@ terraform {
     encrypt = true
   }
 }
-
 
 terraform {
   required_providers {

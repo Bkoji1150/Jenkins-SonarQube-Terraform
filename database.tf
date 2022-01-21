@@ -21,7 +21,6 @@ resource "aws_secretsmanager_secret" "master_secret" {
   }
 }
 
-
 resource "aws_secretsmanager_secret" "users_secret" {
 
   for_each    = toset(var.db_users)

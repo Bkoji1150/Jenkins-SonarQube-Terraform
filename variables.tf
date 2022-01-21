@@ -41,7 +41,7 @@ variable "enable_dns_hostnames" {
   default     = true
 }
 
-variable vol_size {
+variable "vol_size" {
   type    = number
   default = 50
 }
@@ -64,17 +64,17 @@ variable "enable_classiclink_dns_support" {
   default     = null
 }
 
-variable region {
+variable "region" {
   type    = string
   default = "us-east-2"
 }
 
-variable sonar_port {
+variable "sonar_port" {
   type    = number
   default = 9000
 }
 
-variable jenkins_port {
+variable "jenkins_port" {
   type    = number
   default = 8080
 }
@@ -104,7 +104,7 @@ variable "instance_class" {
 #   default = 
 # }
 variable "username_taneble" {
-  type    = list
+  type    = list(any)
   default = ["app1", "app2"]
 }
 variable "db_subnet_group" {
@@ -131,7 +131,7 @@ variable "db_users" {
   default = ["lots", "sprintbot", "cypress_app"]
 }
 
-variable db_users_privileges {
+variable "db_users_privileges" {
   #    description = "EOT 
   #    Example usage of db_users
   #    If user in this map does not exist in the db_users list, it would be ignored. 
@@ -178,7 +178,7 @@ variable "count_jenkins_agents" {
 }
 
 variable "db_clusters" {
-  type        = map
+  type        = map(any)
   description = "The AWS DB cluster reference"
   default = {
     engine     = "postgres"

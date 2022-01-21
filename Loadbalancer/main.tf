@@ -24,7 +24,6 @@ resource "aws_lb_target_group" "Project-OmegalbTargetGroup" {
   }
 }
 
-
 resource "aws_lb_listener" "front_end" {
   load_balancer_arn = aws_lb.Project-Omegalb.arn
   port              = var.listener_port     #80

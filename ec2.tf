@@ -17,11 +17,11 @@ resource "aws_ssm_parameter" "cloud_agent" {
 }
 
 resource "aws_instance" "jenkinsinstance" {
-  count         = var.count_jenkins_agents
-  ami           = "ami-002068ed284fb165b" #data.aws_ami.example.id TODO ami-002068ed284fb165b
-  monitoring    = true
-  instance_type = var.instance-type
-  # iam_instance_profile = "Jenkins_agents_admin_role"
+  count                  = var.count_jenkins_agents
+  ami                    = "ami-002068ed284fb165b" #data.aws_ami.example.id TODO ami-002068ed284fb165b
+  monitoring             = true
+  instance_type          = var.instance-type
+  iam_instance_profile   = aws_iam_instance_profile.ec2_profile.name
   subnet_id              = aws_subnet.fleur-public-subnet[0].id
   vpc_security_group_ids = [aws_security_group.fleur-public-security-group.id]
   key_name               = var.keypair
@@ -54,7 +54,6 @@ resource "aws_instance" "jenkinsinstance" {
     ]
   }
 }
-
 
 resource "aws_instance" "SonarQubesinstance" {
   ami                    = "ami-002068ed284fb165b" #data.aws_ami.example.id TODO
