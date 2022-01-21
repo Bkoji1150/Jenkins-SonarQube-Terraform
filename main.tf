@@ -39,7 +39,6 @@ resource "aws_subnet" "fleur-private-subnet" {
   }
 }
 
-
 resource "aws_internet_gateway" "fleur-gateway" {
   vpc_id = aws_vpc.fleur-vpc[0].id
   tags   = {}
@@ -140,7 +139,7 @@ resource "aws_db_subnet_group" "flour_rds_subnetgroup" {
 }
 
 module "loadbalancing" {
-  source                            = "./Loadbalancer"
+  source                            = "git@github.com:Bkoji1150/Jenkins-SonarQube-Terraform.git//Loadbalancer"
   public_sg                         = [aws_security_group.fleur-public-security-group.id]
   public_subnets                    = aws_subnet.fleur-public-subnet.*.id
   tg_port                           = 8000 # 0
@@ -155,7 +154,7 @@ module "loadbalancing" {
 }
 
 module "compute" {
-  source              = "./Ec2-K8s"
+  source              = "git@github.com:Bkoji1150/Jenkins-SonarQube-Terraform.git//Ec2-K8s"
   instance_count      = 0
   public_sn_count     = 3
   instance_type       = var.intanceec2
