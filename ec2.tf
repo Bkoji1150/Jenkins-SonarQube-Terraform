@@ -1,5 +1,4 @@
 
-
 resource "random_integer" "random" {
   min = 1
   max = 100
@@ -18,7 +17,7 @@ resource "aws_ssm_parameter" "cloud_agent" {
 
 resource "aws_instance" "jenkinsinstance" {
   count                  = var.count_jenkins_agents
-  ami                    = "ami-002068ed284fb165b" #data.aws_ami.example.id TODO ami-002068ed284fb165b
+  ami                    = "ami-08e4e35cccc6189f4" #data.aws_ami.example.id TODO ami-002068ed284fb165b
   monitoring             = true
   instance_type          = var.instance-type
   iam_instance_profile   = aws_iam_instance_profile.ec2_profile.name
@@ -32,7 +31,6 @@ resource "aws_instance" "jenkinsinstance" {
     })
   )
   root_block_device {
-
     volume_size = var.vol_size
   }
   # provisioner local-exec {
@@ -56,7 +54,7 @@ resource "aws_instance" "jenkinsinstance" {
 }
 
 resource "aws_instance" "SonarQubesinstance" {
-  ami                    = "ami-002068ed284fb165b" #data.aws_ami.example.id TODO
+  ami                    = "ami-08e4e35cccc6189f4" #data.aws_ami.example.id TODO
   instance_type          = var.instance-type
   subnet_id              = aws_subnet.fleur-public-subnet[0].id
   vpc_security_group_ids = [aws_security_group.fleur-public-security-group.id]
@@ -74,10 +72,3 @@ resource "aws_instance" "SonarQubesinstance" {
     Name = "SonarQubesinstance"
   }
 }
-
-# resource "aws_lb_target_group_attachment" "jenkins_agents" {
-#   count            = var.count_jenkins_agents
-#   target_group_arn = module.loadbalancing.lb_target_group_arn
-#   target_id        = aws_instance.jenkinsinstance[count.index].id
-#   port             = 8080
-# }

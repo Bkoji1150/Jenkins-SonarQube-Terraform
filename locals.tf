@@ -72,19 +72,19 @@ locals {
   }]
 
   common_secret_values = {
-    engine     = var.db_clusters.engine
-    port       = var.db_clusters.port
-    dbname     = var.db_clusters.dbname
+    engine = var.db_clusters.engine
+    port   = var.db_clusters.port
+    dbname = var.db_clusters.dbname
+    #host = aws_db_instance.postgres_rds.address
     identifier = var.db_clusters.identifier
     password   = random_string.master_user_password.result
   }
   common_tenable_values = {
-    engine     = local.engines_map[var.db_clusters.engine]
-    endpoint   = aws_db_instance.postgres_rds.address
-    port       = var.db_clusters.port
-    dbname     = var.db_clusters.dbname
-    identifier = var.db_clusters.identifier
-    password   = random_string.master_user_password.result
+    engine   = local.engines_map[var.db_clusters.engine]
+    endpoint = aws_db_instance.postgres_rds.address
+    port     = var.db_clusters.port
+    dbname   = var.db_clusters.dbname
+    password = random_string.master_user_password.result
   }
   engines_map = {
     aurora-postgresql = "postgres"
@@ -102,12 +102,12 @@ locals {
     App_Name                = "ovid"
     Cost_center             = "xyz222"
     Business_unit           = "GBS"
-    Business_unit           = "GBS"
     App_role                = "web_server"
     App_role                = "web_server"
     Environment             = "dev"
     Security_Classification = "NA"
   }
 }
+
 
 # privide securty group

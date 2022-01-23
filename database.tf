@@ -3,7 +3,6 @@ locals {
   secrets_manger_names = [{
     key1 = "master_secret"
     key2 = "teneble_app_users_secrets"
-
   }]
 }
 
@@ -14,8 +13,9 @@ resource "random_string" "master_user_password" {
 
 resource "aws_secretsmanager_secret" "master_secret" {
 
-  name        = "master_secret"
-  description = "secret to manage the  ${var.db_clusters.name} application user on ${var.db_clusters.identifier}"
+  name                    = "master_secret"
+  recovery_window_in_days = 0
+  description             = "secret to manage the  ${var.db_clusters.name} application user on ${var.db_clusters.identifier}"
   tags = {
     Name = "postgres_master_secret"
   }
@@ -36,12 +36,10 @@ resource "aws_secretsmanager_secret_version" "master_secret_value" {
   secret_string = jsonencode(merge(local.common_secret_values, { username = var.db_clusters.dbname, password = random_string.master_user_password.result }))
 }
 
-
 resource "aws_secretsmanager_secret_version" "user_secret_value" {
   for_each      = toset(keys(aws_secretsmanager_secret.users_secret))
   secret_id     = aws_secretsmanager_secret.users_secret[each.key].id
   secret_string = jsonencode(merge(local.common_tenable_values, { username = each.key, password = random_string.master_user_password.result }))
-
 }
 
 resource "aws_db_instance" "postgres_rds" {
@@ -73,60 +71,17 @@ resource "aws_db_instance" "postgres_rds" {
   }
 }
 
-provider "postgresql" {
-
-  alias            = "pgconnect"
-  host             = aws_db_instance.postgres_rds.address
-  port             = aws_db_instance.postgres_rds.port
-  username         = var.db_clusters.dbname
-  password         = jsondecode(aws_secretsmanager_secret_version.master_secret_value.secret_string)["password"]
-  superuser        = false
-  sslmode          = "require"
-  expected_version = "10.6"
-
-}
-
-resource "postgresql_database" "postgres" {
-  provider = postgresql.pgconnect
-  name     = "cypress_test"
-}
-
-# resource "postgresql_role" "approle" {
-# name = "app_role"
-# login = true
-# password = "${var.user_password}"
-# }
-
-# variable user_password {
-# description="user password"
-# }
 
 
-
-# resource  "postgresql_role"  "users" {
-#     for_each = var.db_users
-#     name = each.key
-#     login = true 
-#     encrypted_password = true 
-#     password = var.db_initial_id
-#     #  deponds_on = [aws_db_instance.postgres_rds]
-# }
-
-# resource "postgresql_role" "test_role" {
-#   name     = "test_role"
-#   login    = true
-#   password = "test1234"
-# }
 
 # resource "postgresql_role"  "tenable_user" {
 #    count = var.create_tenable_user ? 1 : 0
 #     name = var.tenable_user
-#     login = true 
-#     encrypted_password = true 
-
+#     login = true
+#     encrypted_password = true
 #     password = var.db_user_password
 #     # deponds_on = [aws_db_instance.postgres_rds]
-# } 
+# }
 # resource "postgresql_grant" "users_prilages" {
 #     for_each = {
 #         for idx, user_privileges in var.db_users_privileges : idx => user_privileges
@@ -134,7 +89,7 @@ resource "postgresql_database" "postgres" {
 #     }
 #   database    = var.db_clusters.bname
 # #   role        = each.value.user
-# #   schema      = each.value.privileges 
+# #   schema      = each.value.privileges
 #    privileges  = ["SELECT"]
 #   role        = "test_role"
 #   schema      = "public"
@@ -148,7 +103,6 @@ resource "postgresql_database" "postgres" {
 resource "aws_db_parameter_group" "Postgres_parameter_group" {
   name   = "postgresrds"
   family = "postgres10"
-
 
   parameter {
     name         = "log_connections"

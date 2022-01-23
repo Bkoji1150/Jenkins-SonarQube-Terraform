@@ -139,7 +139,7 @@ resource "aws_db_subnet_group" "flour_rds_subnetgroup" {
 }
 
 module "loadbalancing" {
-  source                            = "git@github.com:Bkoji1150/Jenkins-SonarQube-Terraform.git//Loadbalancer"
+  source                            = "git@github.com:Bkoji1150/3-TIER-TARRAFORM-PROJECT.git//Loadbalancing"
   public_sg                         = [aws_security_group.fleur-public-security-group.id]
   public_subnets                    = aws_subnet.fleur-public-subnet.*.id
   tg_port                           = 8000 # 0
@@ -153,10 +153,12 @@ module "loadbalancing" {
   listener_protocol                 = "HTTP"
 }
 
+/*
 module "compute" {
-  source              = "git@github.com:Bkoji1150/Jenkins-SonarQube-Terraform.git//Ec2-K8s"
+  source              = "git@github.com:Bkoji1150/3-TIER-TARRAFORM-PROJECT.git//compute"
   instance_count      = 0
   public_sn_count     = 3
+  data_values = ""
   instance_type       = var.intanceec2
   public_sg           = [aws_security_group.fleur-public-security-group.id] # db_security_group_lb
   public_subnets      = aws_subnet.fleur-public-subnet.*.id
@@ -169,4 +171,4 @@ module "compute" {
   username            = jsondecode(aws_secretsmanager_secret_version.master_secret_value.secret_string)["dbname"]
   password            = jsondecode(aws_secretsmanager_secret_version.master_secret_value.secret_string)["password"]
   name                = jsondecode(aws_secretsmanager_secret_version.master_secret_value.secret_string)["dbname"]
-}
+}*/

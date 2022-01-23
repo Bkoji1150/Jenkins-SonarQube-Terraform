@@ -66,7 +66,7 @@ variable "enable_classiclink_dns_support" {
 
 variable "region" {
   type    = string
-  default = "us-east-2"
+  default = "us-east-1"
 }
 
 variable "sonar_port" {
@@ -103,6 +103,12 @@ variable "instance_class" {
 #   type = string 
 #   default = 
 # }
+variable "databases_created" {
+  description = "List of all databases Created!!!"
+  type        = list(any)
+  default     = ["my_db1", "cypress_test"]
+}
+
 variable "username_taneble" {
   type    = list(any)
   default = ["app1", "app2"]
@@ -111,9 +117,7 @@ variable "db_subnet_group" {
   type    = bool
   default = true
 }
-# variable "vpc_security_group_ids" {
-#   default = 
-# }
+
 variable "identifier" {
   type    = string
   default = "fleur_dbinstance"
@@ -128,34 +132,36 @@ variable "multi_az" {
 }
 
 variable "db_users" {
-  default = ["lots", "sprintbot", "cypress_app"]
+  default = ["lots", "sprintbot", "cypress_user"]
 }
 
 variable "db_users_privileges" {
-  #    description = "EOT 
-  #    Example usage of db_users
-  #    If user in this map does not exist in the db_users list, it would be ignored. 
-  #     db_users_privileges = 
-  #     {
-  #       user = "example_user1"
-  #       type = "example_type1"
-  #       schema = "example_schema1"
-  #       privileges = ["SELECT", "INSERT", "UPDATE","DELETE"]
-  #    },
-  #    {
-  #       user = "example_user2"
-  #       type = "example_type2"
-  #       schema = "example_schema2"
-  #       privileges = ["SELECT"]
-  #    }
-  #    ]
-  #  Type options: 
-  #  database, schema, teble, sequence, function, foreign_data_wrapper, foreign_server```
-  #  Default values:
-  #  ```type = "table"
-  #  schema = "public"
-  #  }
-  #  EOT"
+  #        description = <<<EOF
+  #        {
+  #          Example usage of db_users
+  #        If user in this map does not exist in the db_users list, it would be ignored.
+  #         db_users_privileges =
+  #         {
+  #           user = "example_user1"
+  #           type = "example_type1"
+  #           schema = "example_schema1"
+  #           privileges = ["SELECT", "INSERT", "UPDATE","DELETE"]
+  #        },
+  #        {
+  #           user = "example_user2"
+  #           type = "example_type2"
+  #           schema = "example_schema2"
+  #           privileges = ["SELECT"]
+  #        }
+  #        ]
+  #      Type options:
+  #      database, schema, teble, sequence, function, foreign_data_wrapper, foreign_server
+  #      Default values:
+  #      type = "table"
+  #      schema = "public"
+  #      }
+  #      EOF
+  #
   type    = map(any)
   default = {}
 }
@@ -211,4 +217,16 @@ variable "public_key_path" {
 
 variable "intanceec2" {
   default = "t3.micro"
+}
+
+variable "lambda_function_name" {
+  default = "lambda_function_for_secrets_rotation"
+}
+
+variable "slack_url" {
+  default = "https://hooks.slack.com/services/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"
+}
+
+variable "slack_channel" {
+  default = "automation_channel"
 }
