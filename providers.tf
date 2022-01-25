@@ -1,6 +1,9 @@
+
 provider "aws" {
-  region  = var.region
-  profile = "default"
+  region = var.region
+  assume_role {
+    role_arn = "arn:aws:iam::735972722491:role/hrq-test-role"
+  }
 }
 
 terraform {
@@ -23,5 +26,7 @@ terraform {
       source = "terraform-providers/postgresql"
     }
   }
-  required_version = ">= 0.13"
+  required_version = ">= v1.1.3"
 }
+
+provider "archive" {}

@@ -4,6 +4,11 @@ resource "random_integer" "random" {
   max = 100
 }
 
+resource "aws_key_pair" "queens_key_auth" {
+  key_name   = var.keypair_name
+  public_key = file(var.public_key_path)
+}
+
 resource "aws_ssm_parameter" "cloud_agent" {
 
   name        = "jenkins"
@@ -23,7 +28,7 @@ resource "aws_instance" "jenkinsinstance" {
   iam_instance_profile   = aws_iam_instance_profile.ec2_profile.name
   subnet_id              = aws_subnet.fleur-public-subnet[0].id
   vpc_security_group_ids = [aws_security_group.fleur-public-security-group.id]
-  key_name               = var.keypair
+  key_name               = aws_key_pair.queens_key_auth.id
   user_data = base64encode(
     templatefile("${path.cwd}/template.tpl",
       {
@@ -53,12 +58,14 @@ resource "aws_instance" "jenkinsinstance" {
   }
 }
 
+
+
 resource "aws_instance" "SonarQubesinstance" {
   ami                    = "ami-08e4e35cccc6189f4" #data.aws_ami.example.id TODO
   instance_type          = var.instance-type
   subnet_id              = aws_subnet.fleur-public-subnet[0].id
   vpc_security_group_ids = [aws_security_group.fleur-public-security-group.id]
-  key_name               = var.keypair
+  key_name               = aws_key_pair.queens_key_auth.id
   user_data = base64encode(
     templatefile("${path.cwd}/sonar.tpl",
       {

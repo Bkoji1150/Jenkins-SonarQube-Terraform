@@ -21,3 +21,7 @@ output "secret_string" {
   value     = aws_secretsmanager_secret_version.master_secret_value.secret_string
   sensitive = true
 }
+
+output "lambda" {
+  value = aws_lambda_function.test_lambda.qualified_arn
+}

@@ -91,18 +91,7 @@ variable "instance_class" {
   type    = string
   default = "db.m4.large"
 }
-# variable "db_cluster" {
-#   type = list
-#   default = []
-# }
-# variable "username" {
-#   type = string 
-#   default = 
-# }
-# variable "password" {
-#   type = string 
-#   default = 
-# }
+
 variable "databases_created" {
   description = "List of all databases Created!!!"
   type        = list(any)
@@ -132,6 +121,7 @@ variable "multi_az" {
 }
 
 variable "db_users" {
+  type    = list(any)
   default = ["lots", "sprintbot", "cypress_user"]
 }
 
@@ -172,6 +162,10 @@ variable "name_prefix" {
   default     = "lots"
 }
 
+variable "list_of_roles" {
+  description = "List of roles in the database, like read/write"
+  default     = ["readwrite_role", "readonly_role", "app_www", "test"]
+}
 variable "tenable_user" {
   description = "RDS Teneble users"
   type        = string
@@ -199,7 +193,6 @@ variable "account_role" {
   description = "Assume role"
   type        = string
   default     = "arn:aws:iam::735972722491:role/haplet-ec2-role"
-
 }
 
 variable "db_initial_id" {
@@ -229,4 +222,8 @@ variable "slack_url" {
 
 variable "slack_channel" {
   default = "automation_channel"
+}
+
+variable "keypair_name" {
+  default = "hapletkey"
 }

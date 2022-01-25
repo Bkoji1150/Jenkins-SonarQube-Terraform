@@ -1,5 +1,3 @@
-# public security group
-
 locals {
   ingress_rules = [{
     to_port     = 8080
@@ -72,10 +70,9 @@ locals {
   }]
 
   common_secret_values = {
-    engine = var.db_clusters.engine
-    port   = var.db_clusters.port
-    dbname = var.db_clusters.dbname
-    #host = aws_db_instance.postgres_rds.address
+    engine     = var.db_clusters.engine
+    port       = var.db_clusters.port
+    dbname     = var.db_clusters.dbname
     identifier = var.db_clusters.identifier
     password   = random_string.master_user_password.result
   }
@@ -92,7 +89,6 @@ locals {
     redshift          = "redshift"
   }
 
-
 }
 
 locals {
@@ -108,6 +104,3 @@ locals {
     Security_Classification = "NA"
   }
 }
-
-
-# privide securty group

@@ -63,7 +63,75 @@ resource "aws_iam_policy" "ec2_policy" {
       },
       {
         "Effect" : "Allow",
-        "Action" : [
+        "Action" : "*",
+        "Resource" : concat([aws_instance.SonarQubesinstance.arn], [for i in aws_instance.jenkinsinstance[*] : i.arn])
+      }
+    ]
+  })
+}
+
+# Create a role
+# https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role
+resource "aws_iam_role" "ec2_role" {
+  name = "ec2_role"
+
+  # Terraform's "jsonencode" function converts a
+  # Terraform expression result to valid JSON syntax.
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Sid    = ""
+        Principal = {
+          Service = "ec2.amazonaws.com"
+        }
+      }
+    ]
+  })
+}
+
+resource "aws_iam_policy_attachment" "ec2_policy_role" {
+  name       = "ec2_attachment"
+  roles      = [aws_iam_role.ec2_role.name]
+  policy_arn = aws_iam_policy.ec2_policy.arn
+}
+
+resource "aws_iam_instance_profile" "ec2_profile" {
+  name = "ec2_profile"
+  role = aws_iam_role.ec2_role.name
+}
+
+data "aws_iam_policy_document" "policy" {
+  statement {
+    sid    = ""
+    effect = "Allow"
+
+    principals {
+      identifiers = ["lambda.amazonaws.com"]
+      type        = "Service"
+    }
+
+    actions = ["sts:AssumeRole"]
+  }
+}
+
+
+resource "aws_iam_policy" "lambda_logging" {
+  name        = "lambda_logging"
+  path        = "/"
+  description = "IAM policy for logging from a lambda"
+
+  policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": [
+        "logs:CreateLogGroup",
+        "logs:CreateLogStream",
+        "logs:PutLogEvents",
           "application-autoscaling:*",
           "autoscaling:*",
           "apigateway:*",
@@ -91,62 +159,17 @@ resource "aws_iam_policy" "ec2_policy" {
           "ssmmessages:*",
           "s3:*",
           "sns:*",
-          "sqs:*"
-        ],
-        "Resource" : concat([aws_instance.SonarQubesinstance.arn], [for i in aws_instance.jenkinsinstance[*] : i.arn])
-      }
-    ]
-  })
+          "sqs:*",
+          "ec2:DescribeNetworkInterfaces",
+          "ec2:CreateNetworkInterface",
+          "ec2:DeleteNetworkInterface",
+          "ec2:DescribeInstances",
+          "ec2:AttachNetworkInterface"
+      ],
+      "Resource": "*",
+      "Effect": "Allow"
+    }
+  ]
 }
-
-# Create a role
-# https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role
-resource "aws_iam_role" "ec2_role" {
-  name = "ec2_role"
-
-  # Terraform's "jsonencode" function converts a
-  # Terraform expression result to valid JSON syntax.
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Action = "sts:AssumeRole"
-        Effect = "Allow"
-        Sid    = ""
-        Principal = {
-          Service = "ec2.amazonaws.com"
-        }
-      },
-    ]
-  })
-}
-
-resource "aws_iam_policy_attachment" "ec2_policy_role" {
-  name       = "ec2_attachment"
-  roles      = [aws_iam_role.ec2_role.name]
-  policy_arn = aws_iam_policy.ec2_policy.arn
-}
-
-resource "aws_iam_instance_profile" "ec2_profile" {
-  name = "ec2_profile"
-  role = aws_iam_role.ec2_role.name
-}
-
-
-resource "aws_iam_role" "iam_for_lambda" {
-  name = "iam_for_lambda"
-
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Action = "sts:AssumeRole"
-        Effect = "Allow"
-        Sid    = ""
-        Principal = {
-          Service = "lambda.amazonaws.com"
-        }
-      },
-    ]
-  })
+EOF
 }

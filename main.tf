@@ -1,5 +1,7 @@
 data "aws_availability_zones" "fleur-zone" {}
 
+data "aws_caller_identity" "current" {}
+
 resource "aws_vpc" "fleur-vpc" {
   count                          = var.create_vpc ? 1 : 0
   cidr_block                     = var.fleur-cidr-block
@@ -9,7 +11,6 @@ resource "aws_vpc" "fleur-vpc" {
   enable_classiclink_dns_support = var.enable_classiclink_dns_support
 
   tags = {}
-
   lifecycle {
     create_before_destroy = true
   }
@@ -22,9 +23,6 @@ resource "aws_subnet" "fleur-public-subnet" {
   availability_zone       = data.aws_availability_zones.fleur-zone.names[count.index]
   map_public_ip_on_launch = true
 
-  lifecycle {
-    create_before_destroy = true
-  }
 }
 
 resource "aws_subnet" "fleur-private-subnet" {
@@ -34,9 +32,7 @@ resource "aws_subnet" "fleur-private-subnet" {
   availability_zone       = data.aws_availability_zones.fleur-zone.names[count.index]
   map_public_ip_on_launch = true
   tags                    = {}
-  lifecycle {
-    create_before_destroy = true
-  }
+
 }
 
 resource "aws_internet_gateway" "fleur-gateway" {
@@ -99,9 +95,6 @@ resource "aws_security_group" "fleur-public-security-group" {
     }
   }
 
-  lifecycle {
-    create_before_destroy = true
-  }
 }
 
 resource "aws_security_group" "fleur-private-security-group" {
@@ -133,9 +126,7 @@ resource "aws_db_subnet_group" "flour_rds_subnetgroup" {
   tags = {
     Name = "flour_rds_subnetgroup"
   }
-  lifecycle {
-    create_before_destroy = true
-  }
+
 }
 
 module "loadbalancing" {
