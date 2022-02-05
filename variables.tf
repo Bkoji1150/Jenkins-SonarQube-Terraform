@@ -128,6 +128,7 @@ variable "db_users_privileges" {
   Example usage of db_users:
   ```db_users_privileges = [
     {
+      database  = "EXAMPLE POSTGRES"
       user       = “example_user1"
       type  = “example_type1”
       schema     = "example_schema1"
@@ -135,6 +136,7 @@ variable "db_users_privileges" {
       objects    = [“example_object”]
     },
     {
+      database  = "EXAMPLE POSTGRES"
       user       = “example_user2"
       type       = “example_type2”
       schema     = “example_schema2"
@@ -151,6 +153,7 @@ variable "db_users_privileges" {
     schema     = string
     privileges = list(string)
     objects    = list(string)
+    database   = string
   }))
   default = []
 }

@@ -1,3 +1,17 @@
+
+locals {
+  master_password      = var.create_db_instance && var.create_random_password ? random_string.master_user_password.result : var.password
+  db_subnet_group_name = !var.cross_region_replica && var.replicate_source_db != null ? null : coalesce(var.db_subnet_group_name, aws_db_subnet_group.flour_rds_subnetgroup[0].id, var.identifie)
+
+  parameter_group_name_id = var.create_db_parameter_group ? aws_db_parameter_group.Postgres_parameter_group.id : var.parameter_group_name
+
+  create_db_option_group = var.create_db_option_group && var.engine != "postgres"
+  option_group           = local.create_db_option_group ? module.db_option_group.db_option_group_id : var.option_group_name
+
+  db_tenable_user = "postgres_aa2"
+  secrets         = jsondecode(aws_secretsmanager_secret_version.master_secret_value.secret_string)
+}
+
 module "db_option_group" {
   source = "./modules/db_option_group"
 
@@ -21,19 +35,11 @@ resource "random_string" "master_user_password" {
   special = false
 }
 
-
-locals {
-  master_password      = var.create_db_instance && var.create_random_password ? random_string.master_user_password.result : var.password
-  db_subnet_group_name = !var.cross_region_replica && var.replicate_source_db != null ? null : coalesce(var.db_subnet_group_name, aws_db_subnet_group.flour_rds_subnetgroup[0].id, var.identifie)
-
-  parameter_group_name_id = var.create_db_parameter_group ? aws_db_parameter_group.Postgres_parameter_group.id : var.parameter_group_name
-
-  create_db_option_group = var.create_db_option_group && var.engine != "postgres"
-  option_group           = local.create_db_option_group ? module.db_option_group.db_option_group_id : var.option_group_name
-
-  # db_users        = flatten([for v, k in var.db_users : [for vv in v : merge({ user = k }, vv)]])
-  db_tenable_user = "postgres_aa2"
-  secrets         = jsondecode(aws_secretsmanager_secret_version.master_secret_value.secret_string)
+resource "random_password" "users_password" {
+  for_each         = toset(var.db_users)
+  length           = 16
+  special          = true
+  override_special = "_%@"
 }
 
 resource "aws_secretsmanager_secret" "master_secret" {
@@ -42,7 +48,7 @@ resource "aws_secretsmanager_secret" "master_secret" {
   description             = "secret to manage superuser ${var.db_clusters.name} on ${var.db_clusters.identifier} database"
   recovery_window_in_days = 0
   tags = {
-    Name = "postgres_master_secret"
+    Name = "master_secret"
   }
 }
 
@@ -53,7 +59,7 @@ resource "aws_secretsmanager_secret" "users_secret" {
   description             = "secret to manage user credentials of ${each.key} on ${var.db_clusters.identifier} database"
   recovery_window_in_days = 0
   tags = {
-    Name = "postgres_master_secret"
+    Name = "users_secret"
   }
 }
 resource "aws_secretsmanager_secret_version" "master_secret_value" {
@@ -64,7 +70,7 @@ resource "aws_secretsmanager_secret_version" "master_secret_value" {
 resource "aws_secretsmanager_secret_version" "user_secret_value" {
   for_each      = toset(keys(aws_secretsmanager_secret.users_secret))
   secret_id     = aws_secretsmanager_secret.users_secret[each.key].id
-  secret_string = jsonencode(merge(local.common_tenable_values, { username = each.key, password = random_string.master_user_password.result }))
+  secret_string = jsonencode(merge(local.common_tenable_values, { username = each.key, password = random_password.users_password[each.key].result }))
 }
 
 resource "aws_db_instance" "postgres_rds" {

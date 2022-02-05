@@ -27,13 +27,44 @@ resource "postgresql_schema" "my_schema" {
   name     = var.schemas_created[count.index]
   owner    = "cypress_app"
 }
+/*
+esource "postgresql_schema" "all_schemas" {
+  
+   for_each = {
+    for idx, schema in var.schema_object: idx => schema
+    if contains(var.db_users, schema.name)
+  }  
 
+  provider = postgresql.pgconnect
+  count    = length(var.schemas_created)
+  name     = var.schemas_created[count.index]
+  owner    = "cypress_app"
+
+  policy {
+    usage = true
+    role  = "${postgresql_role.app_www.name}"
+  }
+
+
+  policy {
+    create = true
+    usage  = true
+    role   = "${postgresql_role.app_releng.name}"
+  }
+
+  policy {
+    create_with_grant = true
+    usage_with_grant  = true
+    role              = "${postgresql_role.app_dba.name}"
+  }
+}
+*/
 resource "postgresql_role" "users" {
   provider   = postgresql.pgconnect
   for_each   = toset(var.db_users)
   name       = each.key
   login      = true
-  password   = local.secrets["password"]
+  password   = random_password.users_password[each.key].result
   depends_on = [aws_db_instance.postgres_rds]
 }
 
@@ -43,7 +74,7 @@ resource "postgresql_grant" "user_privileges" {
     if contains(var.db_users, user_privileges.user)
   }
 
-  database    = aws_db_instance.postgres_rds.name
+  database    = each.value.database
   provider    = postgresql.pgconnect
   role        = each.value.user
   privileges  = each.value.privileges
