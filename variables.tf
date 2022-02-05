@@ -1,11 +1,17 @@
-variable "public-subnet-count" {
-  type    = number
-  default = 3
+variable "public-subnet" {
+  type    = list(any)
+  default = ["hqr-fronend-sub1", "hqr-fronend-sub2", "hqr-fronend-sub3", "hqr-fronend-sub4"]
 }
 
-variable "private-subnet-count" {
-  type    = number
-  default = 2
+variable "private-subnet" {
+  type    = list(any)
+  default = ["hqr-backend-sub1", "hqr-backend-sub2", "hqr-backend-sub3", "hqr-backend-sub4"]
+}
+
+variable "schemas_created" {
+  description = "List of all schema's exists"
+  type        = list(any)
+  default     = ["monolic"]
 }
 
 variable "fleur-cidr-block" {
@@ -18,16 +24,6 @@ variable "map-public-ip" {
   default = true
 }
 
-
-variable "instance-type" {
-  type    = string
-  default = "t2.medium"
-}
-
-variable "keypair" {
-  type    = string
-  default = "jenkins-sonar"
-}
 
 variable "create_vpc" {
   description = "Controls if VPC should be created (it affects almost all resources)"
@@ -66,7 +62,7 @@ variable "enable_classiclink_dns_support" {
 
 variable "region" {
   type    = string
-  default = "us-east-1"
+  default = "us-west-2"
 }
 
 variable "sonar_port" {
@@ -98,10 +94,6 @@ variable "databases_created" {
   default     = ["my_db1", "cypress_test"]
 }
 
-variable "username_taneble" {
-  type    = list(any)
-  default = ["app1", "app2"]
-}
 variable "db_subnet_group" {
   type    = bool
   default = true
@@ -133,8 +125,8 @@ variable "db_users_privileges" {
     {
       user       = “example_user1"
       type       = “example_type1”
-      schema     = “example_schema1"
-      privileges = [“SELECT”, “INSERT”, “UPDATE”, “DELETE”]
+      schema     = "example_schema1"
+      privileges = ["SELECT", "INSERT", "UPDATE", "DELETE"]
       objects    = [“example_object”]
     },
     {
@@ -164,11 +156,6 @@ variable "name_prefix" {
   default     = "lots"
 }
 
-variable "list_of_roles" {
-  description = "List of roles in the database, like read/write"
-  default     = ["readwrite_role", "readonly_role", "app_www", "test"]
-}
-
 variable "tenable_user" {
   description = "RDS Teneble users"
   type        = string
@@ -192,7 +179,6 @@ variable "db_clusters" {
   }
 }
 
-
 variable "db_initial_id" {
   default = "Blesses#default"
 }
@@ -209,7 +195,6 @@ variable "slack_url" {
 variable "slack_channel" {
   default = "automation_channel"
 }
-
 
 variable "typ" {
   type    = bool

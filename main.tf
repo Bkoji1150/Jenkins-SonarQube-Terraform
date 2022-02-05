@@ -3,6 +3,7 @@ data "aws_availability_zones" "fleur-zone" {}
 data "aws_caller_identity" "current" {}
 
 resource "aws_vpc" "fleur-vpc" {
+
   count                          = var.create_vpc ? 1 : 0
   cidr_block                     = var.fleur-cidr-block
   enable_dns_hostnames           = var.enable_dns_hostnames
@@ -16,20 +17,26 @@ resource "aws_vpc" "fleur-vpc" {
 }
 
 resource "aws_subnet" "fleur-public-subnet" {
-  count                   = var.public-subnet-count
+
+  count                   = length(var.public-subnet)
   vpc_id                  = aws_vpc.fleur-vpc[0].id
   cidr_block              = [for i in range(0, 100, 2) : cidrsubnet(var.fleur-cidr-block, 8, i)][count.index]
   availability_zone       = data.aws_availability_zones.fleur-zone.names[count.index]
   map_public_ip_on_launch = true
-
+  tags = {
+    Name = var.public-subnet[count.index]
+  }
 }
 
 resource "aws_subnet" "fleur-private-subnet" {
-  count                   = var.private-subnet-count
-  vpc_id                  = aws_vpc.fleur-vpc[0].id
-  cidr_block              = [for i in range(1, 100, 2) : cidrsubnet(var.fleur-cidr-block, 8, i)][count.index]
-  availability_zone       = data.aws_availability_zones.fleur-zone.names[count.index]
-  map_public_ip_on_launch = true
+
+  count             = length(var.private-subnet)
+  vpc_id            = aws_vpc.fleur-vpc[0].id
+  cidr_block        = [for i in range(1, 100, 2) : cidrsubnet(var.fleur-cidr-block, 8, i)][count.index]
+  availability_zone = data.aws_availability_zones.fleur-zone.names[count.index]
+  tags = {
+    Name = var.private-subnet[count.index]
+  }
 }
 
 resource "aws_internet_gateway" "fleur-gateway" {
@@ -38,7 +45,6 @@ resource "aws_internet_gateway" "fleur-gateway" {
 
 resource "aws_route_table" "fleur-public-route-table" {
   vpc_id = aws_vpc.fleur-vpc[0].id
-
   route {
     cidr_block = "0.0.0.0/0"
     gateway_id = aws_internet_gateway.fleur-gateway.id
@@ -50,15 +56,17 @@ resource "aws_route_table" "fleur-private-route-table" {
 }
 
 resource "aws_route_table_association" "fleur-public-rt-association" {
-  count          = var.public-subnet-count
+
+  count          = length(var.public-subnet)
   subnet_id      = aws_subnet.fleur-public-subnet.*.id[count.index]
   route_table_id = aws_route_table.fleur-public-route-table.id
 }
 
-resource "aws_route_table_association" "fleur-private-rt-association" {
-  count          = var.private-subnet-count
-  subnet_id      = aws_subnet.fleur-private-subnet.*.id[count.index]
-  route_table_id = aws_route_table.fleur-private-route-table.id
+resource "aws_default_route_table" "fleur-route-ass" {
+  default_route_table_id = aws_vpc.fleur-vpc[0].default_route_table_id
+  tags = {
+    name = "fleur-route-ass"
+  }
 }
 
 resource "aws_security_group" "fleur-public-security-group" {
@@ -113,8 +121,8 @@ resource "aws_security_group" "fleur-private-security-group" {
 }
 
 resource "aws_db_subnet_group" "flour_rds_subnetgroup" {
-  count = var.db_subnet_group == true ? 1 : 0
-  name  = "flour_rds_subnetgroup"
+  count       = var.db_subnet_group == true ? 1 : 0
+  name_prefix = "flour_rds_subnetgroup"
   subnet_ids = concat(
     slice(aws_subnet.fleur-public-subnet.*.id, 0, 3)
   )
@@ -124,18 +132,18 @@ resource "aws_db_subnet_group" "flour_rds_subnetgroup" {
 
 }
 
-module "loadbalancing" {
-  source = "git@github.com:Bkoji1150/3-TIER-TARRAFORM-PROJECT.git//Loadbalancing"
+# module "loadbalancing" {
+#   source = "git@github.com:Bkoji1150/3-TIER-TARRAFORM-PROJECT.git//Loadbalancing"
 
-  public_sg                         = [aws_security_group.fleur-public-security-group.id]
-  public_subnets                    = aws_subnet.fleur-public-subnet.*.id
-  tg_port                           = 8000 # 0
-  tg_portocol                       = "HTTP"
-  vpc_id                            = aws_vpc.fleur-vpc[0].id
-  Project-Omega_healthy_threshold   = 2
-  Project-Omega_unhealthy_threshold = 2
-  lb_timeout                        = 3
-  lb_interval                       = 30
-  listener_port                     = 8080
-  listener_protocol                 = "HTTP"
-}
+#   public_sg                         = [aws_security_group.fleur-public-security-group.id]
+#   public_subnets                    = aws_subnet.fleur-public-subnet.*.id
+#   tg_port                           = 8000 # 0
+#   tg_portocol                       = "HTTP"
+#   vpc_id                            = aws_vpc.fleur-vpc[0].id
+#   Project-Omega_healthy_threshold   = 2
+#   Project-Omega_unhealthy_threshold = 2
+#   lb_timeout                        = 3
+#   lb_interval                       = 30
+#   listener_port                     = 8080
+#   listener_protocol                 = "HTTP"
+# }

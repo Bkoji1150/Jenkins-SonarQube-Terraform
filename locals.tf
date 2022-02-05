@@ -46,12 +46,13 @@ locals {
     }
   ]
 
-  private = [{
-    description = "Allow SSH traffic"
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = [var.fleur-cidr-block]
+  private = [
+    {
+      description = "Allow SSH traffic"
+      from_port   = 22
+      to_port     = 22
+      protocol    = "tcp"
+      cidr_blocks = [var.fleur-cidr-block]
     },
     { description = "Allow Postgres traffic"
       from_port   = 5432

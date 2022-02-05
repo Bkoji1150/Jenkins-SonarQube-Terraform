@@ -12,7 +12,6 @@ This module was built using [Jenkins-SonarQube-Terraform](git@github.com:Bkoji11
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | v1.1.4 |
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= v1.1.4 |
 
 ## Providers
@@ -29,7 +28,6 @@ This module was built using [Jenkins-SonarQube-Terraform](git@github.com:Bkoji11
 | Name | Source | Version |
 |------|--------|---------|
 | <a name="module_db_option_group"></a> [db\_option\_group](#module\_db\_option\_group) | ./modules/db_option_group | n/a |
-| <a name="module_loadbalancing"></a> [loadbalancing](#module\_loadbalancing) | git@github.com:Bkoji1150/3-TIER-TARRAFORM-PROJECT.git//Loadbalancing | n/a |
 
 ## Resources
 
@@ -39,6 +37,7 @@ This module was built using [Jenkins-SonarQube-Terraform](git@github.com:Bkoji11
 | [aws_db_instance.postgres_rds](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/db_instance) | resource |
 | [aws_db_parameter_group.Postgres_parameter_group](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/db_parameter_group) | resource |
 | [aws_db_subnet_group.flour_rds_subnetgroup](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/db_subnet_group) | resource |
+| [aws_default_route_table.fleur-route-ass](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/default_route_table) | resource |
 | [aws_iam_policy.lambda_logging](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_role.iam_for_lambda](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
 | [aws_iam_role_policy_attachment.lambda_logs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
@@ -46,7 +45,6 @@ This module was built using [Jenkins-SonarQube-Terraform](git@github.com:Bkoji11
 | [aws_lambda_function.test_lambda](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_function) | resource |
 | [aws_route_table.fleur-private-route-table](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route_table) | resource |
 | [aws_route_table.fleur-public-route-table](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route_table) | resource |
-| [aws_route_table_association.fleur-private-rt-association](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route_table_association) | resource |
 | [aws_route_table_association.fleur-public-rt-association](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route_table_association) | resource |
 | [aws_secretsmanager_secret.master_secret](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/secretsmanager_secret) | resource |
 | [aws_secretsmanager_secret.users_secret](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/secretsmanager_secret) | resource |
@@ -103,7 +101,7 @@ This module was built using [Jenkins-SonarQube-Terraform](git@github.com:Bkoji11
 | <a name="input_db_subnet_group_tags"></a> [db\_subnet\_group\_tags](#input\_db\_subnet\_group\_tags) | Additional tags for the DB subnet group | `map(string)` | `{}` | no |
 | <a name="input_db_subnet_group_use_name_prefix"></a> [db\_subnet\_group\_use\_name\_prefix](#input\_db\_subnet\_group\_use\_name\_prefix) | Determines whether to use `subnet_group_name` as is or create a unique name beginning with the `subnet_group_name` as the prefix | `bool` | `true` | no |
 | <a name="input_db_users"></a> [db\_users](#input\_db\_users) | n/a | `list(any)` | `[]` | no |
-| <a name="input_db_users_privileges"></a> [db\_users\_privileges](#input\_db\_users\_privileges) | If a user in this map does not also exist in the db\_users list, it will be ignored.<br>Example usage of db\_users:<pre>db_users_privileges = [<br>  {<br>    user       = “example_user1"<br>    type       = “example_type1”<br>    schema     = “example_schema1"<br>    privileges = [“SELECT”, “INSERT”, “UPDATE”, “DELETE”]<br>    objects    = [“example_object”]<br>  },<br>  {<br>    user       = “example_user2"<br>    type       = “example_type2”<br>    schema     = “example_schema2"<br>    privileges = [“SELECT”]<br>    objects    = []<br>  }<br>]</pre>Note: An empty objects list applies the privilege on all database objects matching the type provided.<br>For information regarding types and privileges, refer to: https://www.postgresql.org/docs/13/ddl-priv.html | <pre>list(object({<br>    user       = string<br>    type       = string<br>    schema     = string<br>    privileges = list(string)<br>    objects    = list(string)<br>  }))</pre> | `[]` | no |
+| <a name="input_db_users_privileges"></a> [db\_users\_privileges](#input\_db\_users\_privileges) | If a user in this map does not also exist in the db\_users list, it will be ignored.<br>Example usage of db\_users:<pre>db_users_privileges = [<br>  {<br>    user       = “example_user1"<br>    type       = “example_type1”<br>    schema     = "example_schema1"<br>    privileges = ["SELECT", "INSERT", "UPDATE", "DELETE"]<br>    objects    = [“example_object”]<br>  },<br>  {<br>    user       = “example_user2"<br>    type       = “example_type2”<br>    schema     = “example_schema2"<br>    privileges = [“SELECT”]<br>    objects    = []<br>  }<br>]</pre>Note: An empty objects list applies the privilege on all database objects matching the type provided.<br>For information regarding types and privileges, refer to: https://www.postgresql.org/docs/13/ddl-priv.html | <pre>list(object({<br>    user       = string<br>    type       = string<br>    schema     = string<br>    privileges = list(string)<br>    objects    = list(string)<br>  }))</pre> | `[]` | no |
 | <a name="input_delete_automated_backups"></a> [delete\_automated\_backups](#input\_delete\_automated\_backups) | Specifies whether to remove automated backups immediately after the DB instance is deleted | `bool` | `true` | no |
 | <a name="input_deletion_protection"></a> [deletion\_protection](#input\_deletion\_protection) | The database can't be deleted when this value is set to true. | `bool` | `false` | no |
 | <a name="input_domain"></a> [domain](#input\_domain) | The ID of the Directory Service Active Directory domain to create the instance in | `string` | `null` | no |
@@ -123,15 +121,12 @@ This module was built using [Jenkins-SonarQube-Terraform](git@github.com:Bkoji11
 | <a name="input_iam_database_authentication_enabled"></a> [iam\_database\_authentication\_enabled](#input\_iam\_database\_authentication\_enabled) | Specifies whether or not the mappings of AWS Identity and Access Management (IAM) accounts to database accounts are enabled | `bool` | `false` | no |
 | <a name="input_identifie"></a> [identifie](#input\_identifie) | The name of the RDS instance, if omitted, Terraform will assign a random, unique identifier | `string` | `""` | no |
 | <a name="input_identifier"></a> [identifier](#input\_identifier) | n/a | `string` | `"fleur_dbinstance"` | no |
-| <a name="input_instance-type"></a> [instance-type](#input\_instance-type) | n/a | `string` | `"t2.medium"` | no |
 | <a name="input_instance_class"></a> [instance\_class](#input\_instance\_class) | n/a | `string` | `"db.m4.large"` | no |
 | <a name="input_iops"></a> [iops](#input\_iops) | The amount of provisioned IOPS. Setting this implies a storage\_type of 'io1' | `number` | `0` | no |
 | <a name="input_jenkins_port"></a> [jenkins\_port](#input\_jenkins\_port) | n/a | `number` | `8080` | no |
-| <a name="input_keypair"></a> [keypair](#input\_keypair) | n/a | `string` | `"jenkins-sonar"` | no |
 | <a name="input_kms_key_id"></a> [kms\_key\_id](#input\_kms\_key\_id) | The ARN for the KMS encryption key. If creating an encrypted replica, set this to the destination KMS ARN. If storage\_encrypted is set to true and kms\_key\_id is not specified the default KMS key created in your account will be used | `string` | `null` | no |
 | <a name="input_lambda_function_name"></a> [lambda\_function\_name](#input\_lambda\_function\_name) | n/a | `string` | `"lambda_function_for_secrets_rotation"` | no |
 | <a name="input_license_model"></a> [license\_model](#input\_license\_model) | License model information for this DB instance. Optional, but required for some DB engines, i.e. Oracle SE1 | `string` | `null` | no |
-| <a name="input_list_of_roles"></a> [list\_of\_roles](#input\_list\_of\_roles) | List of roles in the database, like read/write | `list` | <pre>[<br>  "readwrite_role",<br>  "readonly_role",<br>  "app_www",<br>  "test"<br>]</pre> | no |
 | <a name="input_maintenance_window"></a> [maintenance\_window](#input\_maintenance\_window) | The window to perform maintenance in. Syntax: 'ddd:hh24:mi-ddd:hh24:mi'. Eg: 'Mon:00:00-Mon:03:00' | `string` | `null` | no |
 | <a name="input_major_engine_version"></a> [major\_engine\_version](#input\_major\_engine\_version) | Specifies the major version of the engine that this option group should be associated with | `string` | `"10.6"` | no |
 | <a name="input_map-public-ip"></a> [map-public-ip](#input\_map-public-ip) | n/a | `bool` | `true` | no |
@@ -157,14 +152,15 @@ This module was built using [Jenkins-SonarQube-Terraform](git@github.com:Bkoji11
 | <a name="input_performance_insights_kms_key_id"></a> [performance\_insights\_kms\_key\_id](#input\_performance\_insights\_kms\_key\_id) | The ARN for the KMS key to encrypt Performance Insights data. | `string` | `null` | no |
 | <a name="input_performance_insights_retention_period"></a> [performance\_insights\_retention\_period](#input\_performance\_insights\_retention\_period) | The amount of time in days to retain Performance Insights data. Either 7 (7 days) or 731 (2 years). | `number` | `7` | no |
 | <a name="input_port"></a> [port](#input\_port) | The port on which the DB accepts connections | `string` | `null` | no |
-| <a name="input_private-subnet-count"></a> [private-subnet-count](#input\_private-subnet-count) | n/a | `number` | `2` | no |
-| <a name="input_public-subnet-count"></a> [public-subnet-count](#input\_public-subnet-count) | n/a | `number` | `3` | no |
+| <a name="input_private-subnet"></a> [private-subnet](#input\_private-subnet) | n/a | `list(any)` | <pre>[<br>  "hqr-backend-sub1",<br>  "hqr-backend-sub2",<br>  "hqr-backend-sub3",<br>  "hqr-backend-sub4"<br>]</pre> | no |
+| <a name="input_public-subnet"></a> [public-subnet](#input\_public-subnet) | n/a | `list(any)` | <pre>[<br>  "hqr-fronend-sub1",<br>  "hqr-fronend-sub2",<br>  "hqr-fronend-sub3",<br>  "hqr-fronend-sub4"<br>]</pre> | no |
 | <a name="input_publicly_accessible"></a> [publicly\_accessible](#input\_publicly\_accessible) | Bool to control if instance is publicly accessible | `bool` | `false` | no |
 | <a name="input_random_password_length"></a> [random\_password\_length](#input\_random\_password\_length) | (Optional) Length of random password to create. (default: 10) | `number` | `10` | no |
-| <a name="input_region"></a> [region](#input\_region) | n/a | `string` | `"us-east-1"` | no |
+| <a name="input_region"></a> [region](#input\_region) | n/a | `string` | `"us-west-2"` | no |
 | <a name="input_replicate_source_db"></a> [replicate\_source\_db](#input\_replicate\_source\_db) | Specifies that this resource is a Replicate database, and to use this value as the source database. This correlates to the identifier of another Amazon RDS Database to replicate. | `string` | `null` | no |
 | <a name="input_restore_to_point_in_time"></a> [restore\_to\_point\_in\_time](#input\_restore\_to\_point\_in\_time) | Restore to a point in time (MySQL is NOT supported) | `map(string)` | `null` | no |
 | <a name="input_s3_import"></a> [s3\_import](#input\_s3\_import) | Restore from a Percona Xtrabackup in S3 (only MySQL is supported) | `map(string)` | `null` | no |
+| <a name="input_schemas_created"></a> [schemas\_created](#input\_schemas\_created) | List of all schema's exists | `list(any)` | <pre>[<br>  "monolic"<br>]</pre> | no |
 | <a name="input_skip_db_snapshot"></a> [skip\_db\_snapshot](#input\_skip\_db\_snapshot) | n/a | `string` | `true` | no |
 | <a name="input_skip_final_snapshot"></a> [skip\_final\_snapshot](#input\_skip\_final\_snapshot) | Determines whether a final DB snapshot is created before the DB instance is deleted. If true is specified, no DBSnapshot is created. If false is specified, a DB snapshot is created before the DB instance is deleted, using the value from final\_snapshot\_identifier | `bool` | `false` | no |
 | <a name="input_slack_channel"></a> [slack\_channel](#input\_slack\_channel) | n/a | `string` | `"automation_channel"` | no |
@@ -180,7 +176,6 @@ This module was built using [Jenkins-SonarQube-Terraform](git@github.com:Bkoji11
 | <a name="input_timezone"></a> [timezone](#input\_timezone) | (Optional) Time zone of the DB instance. timezone is currently only supported by Microsoft SQL Server. The timezone can only be set on creation. See MSSQL User Guide for more information. | `string` | `null` | no |
 | <a name="input_typ"></a> [typ](#input\_typ) | n/a | `bool` | `true` | no |
 | <a name="input_username"></a> [username](#input\_username) | Username for the master DB user | `string` | `null` | no |
-| <a name="input_username_taneble"></a> [username\_taneble](#input\_username\_taneble) | n/a | `list(any)` | <pre>[<br>  "app1",<br>  "app2"<br>]</pre> | no |
 | <a name="input_vol_size"></a> [vol\_size](#input\_vol\_size) | n/a | `number` | `50` | no |
 | <a name="input_vpc_security_group_ids"></a> [vpc\_security\_group\_ids](#input\_vpc\_security\_group\_ids) | List of VPC security groups to associate | `list(string)` | `[]` | no |
 

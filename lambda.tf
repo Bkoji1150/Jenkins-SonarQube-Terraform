@@ -36,7 +36,7 @@ resource "aws_lambda_function" "test_lambda" {
 }
 
 resource "aws_cloudwatch_log_group" "example" {
-  name              = "/aws/lambda/${var.lambda_function_name}"
+  name_prefix       = "/aws/lambda/${var.lambda_function_name}"
   retention_in_days = 14
 }
 
@@ -46,6 +46,6 @@ resource "aws_iam_role_policy_attachment" "lambda_logs" {
 }
 
 resource "aws_iam_role" "iam_for_lambda" {
-  name               = "iam_for_hqr_lambda"
+  name_prefix        = "iam_for_hqr_lambda"
   assume_role_policy = data.aws_iam_policy_document.policy.json
 }

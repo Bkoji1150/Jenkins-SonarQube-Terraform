@@ -31,14 +31,14 @@ locals {
   create_db_option_group = var.create_db_option_group && var.engine != "postgres"
   option_group           = local.create_db_option_group ? module.db_option_group.db_option_group_id : var.option_group_name
 
-  db_users        = flatten([for v, k in var.db_users : [for vv in v : merge({ user = k }, vv)]])
+  # db_users        = flatten([for v, k in var.db_users : [for vv in v : merge({ user = k }, vv)]])
   db_tenable_user = "postgres_aa2"
   secrets         = jsondecode(aws_secretsmanager_secret_version.master_secret_value.secret_string)
 }
 
 resource "aws_secretsmanager_secret" "master_secret" {
 
-  name                    = "master_secret"
+  name_prefix             = "master_secret"
   description             = "secret to manage the  ${var.db_clusters.name} application user on ${var.db_clusters.identifier}"
   recovery_window_in_days = 0
   tags = {
@@ -49,7 +49,7 @@ resource "aws_secretsmanager_secret" "master_secret" {
 resource "aws_secretsmanager_secret" "users_secret" {
 
   for_each                = toset(var.db_users)
-  name_prefix             = each.key == var.tenable_user ? "tenable-${var.name_prefix}" : var.name_prefix
+  name_prefix             = each.key == var.db_users ? "tenable-${var.name_prefix}" : var.name_prefix
   description             = "secret to manage the  ${each.key} user credentials on ${var.db_clusters.identifier}"
   recovery_window_in_days = 0
   tags = {
@@ -99,8 +99,8 @@ resource "aws_db_instance" "postgres_rds" {
 }
 
 resource "aws_db_parameter_group" "Postgres_parameter_group" {
-  name   = "postgresrds"
-  family = "postgres10"
+  name_prefix = "postgresrds"
+  family      = "postgres10"
 
   parameter {
     name         = "log_connections"
