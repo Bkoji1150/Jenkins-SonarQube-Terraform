@@ -81,11 +81,13 @@ variable "db_storage" {
 }
 
 variable "engine_version" {
-  default = "10.6"
+  description = "Hqr postgres db version"
+  default     = "10.6"
 }
 variable "instance_class" {
-  type    = string
-  default = "db.m4.large"
+  description = "hqr db instance class"
+  type        = string
+  default     = "db.m4.large"
 }
 
 variable "databases_created" {
@@ -95,26 +97,31 @@ variable "databases_created" {
 }
 
 variable "db_subnet_group" {
-  type    = bool
-  default = true
+  description = "hqr db subnet group"
+  type        = bool
+  default     = true
 }
 
 variable "identifier" {
-  type    = string
-  default = "fleur_dbinstance"
+  description = "hqr database identifier"
+  type        = string
+  default     = "fleur_dbinstance"
 }
 variable "skip_db_snapshot" {
-  type    = string
-  default = true
+  description = "skip snaption for hqr db instance"
+  type        = string
+  default     = true
 }
 variable "multi_az" {
-  type    = bool
-  default = true
+  description = "Enable multity az for hqr db instance"
+  type        = bool
+  default     = true
 }
 
 variable "db_users" {
-  type    = list(any)
-  default = []
+  description = "List of all databases"
+  type        = list(any)
+  default     = []
 }
 
 variable "db_users_privileges" {
@@ -151,9 +158,9 @@ variable "db_users_privileges" {
 }
 
 variable "name_prefix" {
-  description = ""
+  description = "Name prefix for secrets rotaion"
   type        = string
-  default     = "lots"
+  default     = "hqr-database-reporting"
 }
 
 variable "tenable_user" {
@@ -180,23 +187,33 @@ variable "db_clusters" {
 }
 
 variable "db_initial_id" {
-  default = "Blesses#default"
+  type        = string
+  description = "database initail id"
+  default     = "Blesses#default"
 }
 
 
 variable "lambda_function_name" {
-  default = "lambda_function_for_secrets_rotation"
+  type        = string
+  description = "Name of the lambda function"
+  default     = "lambda_function_for_secrets_rotation"
 }
 
 variable "slack_url" {
-  default = "https://hooks.slack.com/services/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"
+  type        = string
+  description = "url of slack"
+  sensitive   = true
+  default     = "https://hooks.slack.com/services/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"
 }
 
 variable "slack_channel" {
-  default = "automation_channel"
+  description = "Slack channel name"
+  type        = string
+  default     = "automation_channel"
 }
 
 variable "typ" {
-  type    = bool
-  default = true
+  description = "type"
+  type        = bool
+  default     = true
 }
