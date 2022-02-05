@@ -122,38 +122,40 @@ variable "multi_az" {
 
 variable "db_users" {
   type    = list(any)
-  default = ["lots", "sprintbot", "cypress_user"]
+  default = []
 }
 
 variable "db_users_privileges" {
-  #        description = <<<EOF
-  #        {
-  #          Example usage of db_users
-  #        If user in this map does not exist in the db_users list, it would be ignored.
-  #         db_users_privileges =
-  #         {
-  #           user = "example_user1"
-  #           type = "example_type1"
-  #           schema = "example_schema1"
-  #           privileges = ["SELECT", "INSERT", "UPDATE","DELETE"]
-  #        },
-  #        {
-  #           user = "example_user2"
-  #           type = "example_type2"
-  #           schema = "example_schema2"
-  #           privileges = ["SELECT"]
-  #        }
-  #        ]
-  #      Type options:
-  #      database, schema, teble, sequence, function, foreign_data_wrapper, foreign_server
-  #      Default values:
-  #      type = "table"
-  #      schema = "public"
-  #      }
-  #      EOF
-  #
-  type    = map(any)
-  default = {}
+  description = <<-EOT
+  If a user in this map does not also exist in the db_users list, it will be ignored.
+  Example usage of db_users:
+  ```db_users_privileges = [
+    {
+      user       = “example_user1"
+      type       = “example_type1”
+      schema     = “example_schema1"
+      privileges = [“SELECT”, “INSERT”, “UPDATE”, “DELETE”]
+      objects    = [“example_object”]
+    },
+    {
+      user       = “example_user2"
+      type       = “example_type2”
+      schema     = “example_schema2"
+      privileges = [“SELECT”]
+      objects    = []
+    }
+  ]```
+  Note: An empty objects list applies the privilege on all database objects matching the type provided.
+  For information regarding types and privileges, refer to: https://www.postgresql.org/docs/13/ddl-priv.html
+  EOT
+  type = list(object({
+    user       = string
+    type       = string
+    schema     = string
+    privileges = list(string)
+    objects    = list(string)
+  }))
+  default = []
 }
 
 variable "name_prefix" {
@@ -166,6 +168,7 @@ variable "list_of_roles" {
   description = "List of roles in the database, like read/write"
   default     = ["readwrite_role", "readonly_role", "app_www", "test"]
 }
+
 variable "tenable_user" {
   description = "RDS Teneble users"
   type        = string
@@ -185,32 +188,15 @@ variable "db_clusters" {
     name       = "cypress_app"
     port       = 5432
     dbname     = "cypress_app"
-    identifier = "postgres-sbx-dop"
+    identifier = "hqr-database-reporting"
   }
 }
 
-variable "account_role" {
-  description = "Assume role"
-  type        = string
-  default     = "arn:aws:iam::735972722491:role/haplet-ec2-role"
-}
 
 variable "db_initial_id" {
   default = "Blesses#default"
 }
 
-variable "jenkins-tags" {
-  type    = list(string)
-  default = ["Master-node", "agen1"]
-}
-
-variable "public_key_path" {
-
-}
-
-variable "intanceec2" {
-  default = "t3.micro"
-}
 
 variable "lambda_function_name" {
   default = "lambda_function_for_secrets_rotation"
@@ -224,6 +210,8 @@ variable "slack_channel" {
   default = "automation_channel"
 }
 
-variable "keypair_name" {
-  default = "hapletkey"
+
+variable "typ" {
+  type    = bool
+  default = true
 }

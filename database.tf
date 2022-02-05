@@ -14,6 +14,14 @@ module "db_option_group" {
   tags     = merge(local.default_tags, var.db_option_group_tags)
 }
 
+resource "random_uuid" "shapshot_postfix" {}
+
+resource "random_string" "master_user_password" {
+  length  = 16
+  special = false
+}
+
+
 locals {
   master_password      = var.create_db_instance && var.create_random_password ? random_string.master_user_password.result : var.password
   db_subnet_group_name = !var.cross_region_replica && var.replicate_source_db != null ? null : coalesce(var.db_subnet_group_name, aws_db_subnet_group.flour_rds_subnetgroup[0].id, var.identifie)
@@ -22,27 +30,17 @@ locals {
 
   create_db_option_group = var.create_db_option_group && var.engine != "postgres"
   option_group           = local.create_db_option_group ? module.db_option_group.db_option_group_id : var.option_group_name
-}
 
-locals {
-  secrets_manger_names = [{
-    key1 = "master_secret"
-    key2 = "teneble_app_users_secrets"
-  }]
-}
-
-resource "random_uuid" "shapshot_postfix" {}
-
-resource "random_string" "master_user_password" {
-  length  = 16
-  special = false
+  db_users        = flatten([for v, k in var.db_users : [for vv in v : merge({ user = k }, vv)]])
+  db_tenable_user = "postgres_aa2"
+  secrets         = jsondecode(aws_secretsmanager_secret_version.master_secret_value.secret_string)
 }
 
 resource "aws_secretsmanager_secret" "master_secret" {
 
   name                    = "master_secret"
-  recovery_window_in_days = 0
   description             = "secret to manage the  ${var.db_clusters.name} application user on ${var.db_clusters.identifier}"
+  recovery_window_in_days = 0
   tags = {
     Name = "postgres_master_secret"
   }
@@ -50,9 +48,10 @@ resource "aws_secretsmanager_secret" "master_secret" {
 
 resource "aws_secretsmanager_secret" "users_secret" {
 
-  for_each    = toset(var.db_users)
-  name_prefix = each.key == var.tenable_user ? "tenable-${var.name_prefix}" : var.name_prefix
-  description = "secret to manage the  ${each.key} user credentials on ${var.db_clusters.identifier}"
+  for_each                = toset(var.db_users)
+  name_prefix             = each.key == var.tenable_user ? "tenable-${var.name_prefix}" : var.name_prefix
+  description             = "secret to manage the  ${each.key} user credentials on ${var.db_clusters.identifier}"
+  recovery_window_in_days = 0
   tags = {
     Name = "postgres_master_secret"
   }
@@ -75,10 +74,10 @@ resource "aws_db_instance" "postgres_rds" {
   engine_version    = var.engine_version
   instance_class    = var.instance_class
 
-  name                   = jsondecode(aws_secretsmanager_secret_version.master_secret_value.secret_string)["username"]
-  port                   = jsondecode(aws_secretsmanager_secret_version.master_secret_value.secret_string)["port"]
-  username               = jsondecode(aws_secretsmanager_secret_version.master_secret_value.secret_string)["dbname"]
-  password               = jsondecode(aws_secretsmanager_secret_version.master_secret_value.secret_string)["password"]
+  name                   = local.secrets["username"]
+  port                   = local.secrets["port"]
+  username               = local.secrets["dbname"]
+  password               = local.secrets["password"]
   parameter_group_name   = aws_db_parameter_group.Postgres_parameter_group.id
   vpc_security_group_ids = [aws_security_group.fleur-private-security-group.id]
 

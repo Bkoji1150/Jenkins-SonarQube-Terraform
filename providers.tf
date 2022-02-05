@@ -4,10 +4,13 @@ provider "aws" {
   assume_role {
     role_arn = "arn:aws:iam::735972722491:role/hrq-test-role"
   }
+  default_tags {
+    tags = local.default_tags
+  }
 }
 
 terraform {
-  required_version = "v1.1.3"
+  required_version = "v1.1.4"
 
   backend "s3" {
     region  = "us-east-2"
@@ -23,10 +26,10 @@ terraform {
       source = "hashicorp/aws"
     }
     postgresql = {
-      source = "terraform-providers/postgresql"
+      source = "cyrilgdn/postgresql"
     }
   }
-  required_version = ">= v1.1.3"
+  required_version = ">= v1.1.4"
 }
 
 provider "archive" {}

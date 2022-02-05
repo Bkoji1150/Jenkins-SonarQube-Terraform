@@ -1,5 +1,5 @@
 
-resource "random_integer" "random" {
+/*resource "random_integer" "random" {
   min = 1
   max = 100
 }
@@ -58,6 +58,13 @@ resource "aws_instance" "jenkinsinstance" {
   }
 }
 
+# eip for DNS ROUTING
+
+resource "aws_eip" "lb" {
+  instance = format("%s:%s", aws_instance.jenkinsinstance[0].public_ip, var.jenkins_port)
+  vpc      = true
+}
+
 
 
 resource "aws_instance" "SonarQubesinstance" {
@@ -79,3 +86,4 @@ resource "aws_instance" "SonarQubesinstance" {
     Name = "SonarQubesinstance"
   }
 }
+*/

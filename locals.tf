@@ -88,19 +88,14 @@ locals {
     postgres          = "postgres"
     redshift          = "redshift"
   }
-
-}
-
-locals {
   default_tags = {
-    Name                    = "jjtechAPP"
-    name                    = ""
+    Name                    = "hqr-bellese"
+    Created_by              = "devops@hqr.io"
     App_Name                = "ovid"
     Cost_center             = "xyz222"
     Business_unit           = "GBS"
     App_role                = "web_server"
-    App_role                = "web_server"
     Environment             = "dev"
-    Security_Classification = "NA"
+    Security_Classification = "Internal"
   }
 }

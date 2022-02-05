@@ -10,7 +10,6 @@ resource "aws_vpc" "fleur-vpc" {
   enable_classiclink             = var.enable_classiclink
   enable_classiclink_dns_support = var.enable_classiclink_dns_support
 
-  tags = {}
   lifecycle {
     create_before_destroy = true
   }
@@ -31,13 +30,10 @@ resource "aws_subnet" "fleur-private-subnet" {
   cidr_block              = [for i in range(1, 100, 2) : cidrsubnet(var.fleur-cidr-block, 8, i)][count.index]
   availability_zone       = data.aws_availability_zones.fleur-zone.names[count.index]
   map_public_ip_on_launch = true
-  tags                    = {}
-
 }
 
 resource "aws_internet_gateway" "fleur-gateway" {
   vpc_id = aws_vpc.fleur-vpc[0].id
-  tags   = {}
 }
 
 resource "aws_route_table" "fleur-public-route-table" {
@@ -114,7 +110,6 @@ resource "aws_security_group" "fleur-private-security-group" {
       cidr_blocks = pr.value.cidr_blocks
     }
   }
-  tags = {}
 }
 
 resource "aws_db_subnet_group" "flour_rds_subnetgroup" {
@@ -130,7 +125,8 @@ resource "aws_db_subnet_group" "flour_rds_subnetgroup" {
 }
 
 module "loadbalancing" {
-  source                            = "git@github.com:Bkoji1150/3-TIER-TARRAFORM-PROJECT.git//Loadbalancing"
+  source = "git@github.com:Bkoji1150/3-TIER-TARRAFORM-PROJECT.git//Loadbalancing"
+
   public_sg                         = [aws_security_group.fleur-public-security-group.id]
   public_subnets                    = aws_subnet.fleur-public-subnet.*.id
   tg_port                           = 8000 # 0
@@ -143,23 +139,3 @@ module "loadbalancing" {
   listener_port                     = 8080
   listener_protocol                 = "HTTP"
 }
-
-/*
-module "compute" {
-  source              = "git@github.com:Bkoji1150/3-TIER-TARRAFORM-PROJECT.git//compute"
-  instance_count      = 0
-  public_sn_count     = 3
-  data_values = ""
-  instance_type       = var.intanceec2
-  public_sg           = [aws_security_group.fleur-public-security-group.id] # db_security_group_lb
-  public_subnets      = aws_subnet.fleur-public-subnet.*.id
-  keypair_name        = "hapletkey"
-  public_key_path     = var.public_key_path
-  user_data_path      = "${path.root}/userdata.tpl"
-  vol_size            = 10
-  lb_target_group_arn = module.loadbalancing.lb_target_group_arn
-  db_endpoint         = aws_db_instance.postgres_rds.endpoint
-  username            = jsondecode(aws_secretsmanager_secret_version.master_secret_value.secret_string)["dbname"]
-  password            = jsondecode(aws_secretsmanager_secret_version.master_secret_value.secret_string)["password"]
-  name                = jsondecode(aws_secretsmanager_secret_version.master_secret_value.secret_string)["dbname"]
-}*/
