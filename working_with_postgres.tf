@@ -19,22 +19,32 @@ resource "postgresql_database" "postgres" {
   depends_on        = [aws_db_instance.postgres_rds]
 }
 
+
+resource "postgresql_schema" "my_schema" {
+
+  provider = postgresql.pgconnect
+  count    = length(var.schemas_created)
+  name     = var.schemas_created[count.index]
+  owner    = "cypress_app"
+}
+
 resource "postgresql_role" "users" {
   provider   = postgresql.pgconnect
   for_each   = toset(var.db_users)
   name       = each.key
   login      = true
-  password   = jsondecode(aws_secretsmanager_secret_version.master_secret_value.secret_string)["password"]
+  password   = local.secrets["password"]
   depends_on = [aws_db_instance.postgres_rds]
 }
 
 resource "postgresql_grant" "user_privileges" {
-  provider = postgresql.pgconnect
   for_each = {
     for idx, user_privileges in var.db_users_privileges : idx => user_privileges
     if contains(var.db_users, user_privileges.user)
   }
+
   database    = aws_db_instance.postgres_rds.name
+  provider    = postgresql.pgconnect
   role        = each.value.user
   privileges  = each.value.privileges
   object_type = each.value.type

@@ -11,7 +11,6 @@ variable "private-subnet" {
 variable "schemas_created" {
   description = "List of all schema's exists"
   type        = list(any)
-  default     = ["monolic"]
 }
 
 variable "fleur-cidr-block" {
@@ -23,7 +22,6 @@ variable "map-public-ip" {
   type    = bool
   default = true
 }
-
 
 variable "create_vpc" {
   description = "Controls if VPC should be created (it affects almost all resources)"
@@ -131,7 +129,7 @@ variable "db_users_privileges" {
   ```db_users_privileges = [
     {
       user       = “example_user1"
-      type       = “example_type1”
+      type  = “example_type1”
       schema     = "example_schema1"
       privileges = ["SELECT", "INSERT", "UPDATE", "DELETE"]
       objects    = [“example_object”]
@@ -191,7 +189,6 @@ variable "db_initial_id" {
   description = "database initail id"
   default     = "Blesses#default"
 }
-
 
 variable "lambda_function_name" {
   type        = string

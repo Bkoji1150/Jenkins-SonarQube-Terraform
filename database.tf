@@ -39,7 +39,7 @@ locals {
 resource "aws_secretsmanager_secret" "master_secret" {
 
   name_prefix             = "master_secret"
-  description             = "secret to manage the  ${var.db_clusters.name} application user on ${var.db_clusters.identifier}"
+  description             = "secret to manage superuser ${var.db_clusters.name} on ${var.db_clusters.identifier} database"
   recovery_window_in_days = 0
   tags = {
     Name = "postgres_master_secret"
@@ -50,7 +50,7 @@ resource "aws_secretsmanager_secret" "users_secret" {
 
   for_each                = toset(var.db_users)
   name_prefix             = each.key == var.db_users ? "tenable-${var.name_prefix}" : var.name_prefix
-  description             = "secret to manage the  ${each.key} user credentials on ${var.db_clusters.identifier}"
+  description             = "secret to manage user credentials of ${each.key} on ${var.db_clusters.identifier} database"
   recovery_window_in_days = 0
   tags = {
     Name = "postgres_master_secret"

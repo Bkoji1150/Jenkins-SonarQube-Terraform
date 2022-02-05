@@ -20,4 +20,4 @@ db_users_privileges = [
   }
 ]
 
-#schemas_created = ["monolic"]
+schemas_created = ["monolic", "cypress_schema"]

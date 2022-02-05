@@ -2,6 +2,7 @@ data "aws_availability_zones" "fleur-zone" {}
 
 data "aws_caller_identity" "current" {}
 
+
 resource "aws_vpc" "fleur-vpc" {
 
   count                          = var.create_vpc ? 1 : 0
@@ -131,19 +132,3 @@ resource "aws_db_subnet_group" "flour_rds_subnetgroup" {
   }
 
 }
-
-# module "loadbalancing" {
-#   source = "git@github.com:Bkoji1150/3-TIER-TARRAFORM-PROJECT.git//Loadbalancing"
-
-#   public_sg                         = [aws_security_group.fleur-public-security-group.id]
-#   public_subnets                    = aws_subnet.fleur-public-subnet.*.id
-#   tg_port                           = 8000 # 0
-#   tg_portocol                       = "HTTP"
-#   vpc_id                            = aws_vpc.fleur-vpc[0].id
-#   Project-Omega_healthy_threshold   = 2
-#   Project-Omega_unhealthy_threshold = 2
-#   lb_timeout                        = 3
-#   lb_interval                       = 30
-#   listener_port                     = 8080
-#   listener_protocol                 = "HTTP"
-# }
