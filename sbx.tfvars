@@ -2,7 +2,8 @@ db_users = [
   "kojibello",
   "kelder",
   "apple",
-  "pop"
+  "pop",
+  "ange"
 ]
 
 db_users_privileges = [
@@ -52,6 +53,38 @@ db_users_privileges = [
     schema     = "cypress_schema"
     type       = "table"
     user       = "apple"
+    objects    = []
+  },
+  {
+    database   = "postgres"
+    privileges = ["SELECT", "INSERT", "UPDATE", "DELETE"]
+    schema     = "cypress_schema"
+    type       = "table"
+    user       = "pop"
+    objects    = []
+  },
+  {
+    database   = "postgres"
+    privileges = ["USAGE"]
+    schema     = "cypress_schema"
+    type       = "schema"
+    user       = "pop"
+    objects    = []
+  },
+  {
+    database   = "postgres"
+    privileges = ["SELECT", "INSERT"]
+    schema     = "test"
+    type       = "table"
+    user       = "ange"
+    objects    = []
+  },
+  {
+    database   = "postgres"
+    privileges = ["USAGE"]
+    schema     = "test"
+    type       = "schema"
+    user       = "ange"
     objects    = []
   }
 ]

@@ -11,3 +11,17 @@ output "secret_string" {
 output "lambda" {
   value = aws_lambda_function.test_lambda.qualified_arn
 }
+
+output "vpc_id" {
+  value = aws_vpc.fleur-vpc[0].id
+}
+
+output "frontend_subnet_ids" {
+  description = "List of all frontend ids"
+  value       = [for idx in aws_subnet.fleur-public-subnet : idx.id]
+}
+
+output "backend_subnet_ids" {
+  description = "List of all frontend ids"
+  value       = [for idx in aws_subnet.fleur-private-subnet : idx.id]
+}

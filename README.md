@@ -185,9 +185,12 @@ This module was built using [Jenkins-SonarQube-Terraform](git@github.com:Bkoji11
 
 | Name | Description |
 |------|-------------|
+| <a name="output_backend_subnet_ids"></a> [backend\_subnet\_ids](#output\_backend\_subnet\_ids) | List of all frontend ids |
 | <a name="output_db_passwd"></a> [db\_passwd](#output\_db\_passwd) | n/a |
+| <a name="output_frontend_subnet_ids"></a> [frontend\_subnet\_ids](#output\_frontend\_subnet\_ids) | List of all frontend ids |
 | <a name="output_lambda"></a> [lambda](#output\_lambda) | n/a |
 | <a name="output_secret_string"></a> [secret\_string](#output\_secret\_string) | n/a |
+| <a name="output_vpc_id"></a> [vpc\_id](#output\_vpc\_id) | n/a |
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 
 ## Authors
