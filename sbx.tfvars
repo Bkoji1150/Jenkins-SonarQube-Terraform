@@ -3,7 +3,8 @@ db_users = [
   "kelder",
   "apple",
   "pop",
-  "ange"
+  "ange",
+  "missif"
 ]
 
 db_users_privileges = [
@@ -70,23 +71,48 @@ db_users_privileges = [
     type       = "schema"
     user       = "pop"
     objects    = []
-  },
-  {
-    database   = "postgres"
-    privileges = ["SELECT", "INSERT"]
-    schema     = "test"
-    type       = "table"
-    user       = "ange"
-    objects    = []
-  },
-  {
-    database   = "postgres"
-    privileges = ["USAGE"]
-    schema     = "test"
-    type       = "schema"
-    user       = "ange"
-    objects    = []
   }
 ]
 
-schemas_created = ["monolic", "cypress_schema"]
+schemas_list_owners = [
+  {
+    database           = "postgres"
+    name_of_theschema  = "monolic"
+    onwer              = "cypress_app"
+    usage              = true
+    role               = null
+    with_create_object = true
+    with_usage         = true
+    role_name          = "cypress_app"
+  },
+  {
+    database           = "postgres"
+    name_of_theschema  = "cypress_schema"
+    onwer              = "cypress_app"
+    usage              = true
+    role               = null
+    with_create_object = true
+    with_usage         = true
+    role_name          = "cypress_app"
+  },
+  {
+    database           = "my_db1"
+    name_of_theschema  = "test"
+    onwer              = "cypress_app"
+    usage              = true
+    role               = null
+    with_create_object = true
+    with_usage         = true
+    role_name          = "cypress_app"
+  },
+  {
+    database           = "cypress_test"
+    name_of_theschema  = "test1"
+    onwer              = "apple"
+    usage              = true
+    role               = "cypress_app"
+    with_create_object = true
+    with_usage         = true
+    role_name          = "cypress_app"
+  }
+]

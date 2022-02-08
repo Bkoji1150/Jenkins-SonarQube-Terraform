@@ -67,6 +67,7 @@ resource "aws_secretsmanager_secret_version" "master_secret_value" {
   secret_string = jsonencode(merge(local.common_secret_values, { username = var.db_clusters.dbname, password = random_string.master_user_password.result }))
 }
 
+# Secrets Manager for all application users that requires a password 
 resource "aws_secretsmanager_secret_version" "user_secret_value" {
   for_each      = toset(keys(aws_secretsmanager_secret.users_secret))
   secret_id     = aws_secretsmanager_secret.users_secret[each.key].id

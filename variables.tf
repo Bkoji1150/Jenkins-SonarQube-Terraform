@@ -8,11 +8,6 @@ variable "private-subnet" {
   default = ["hqr-backend-sub1", "hqr-backend-sub2", "hqr-backend-sub3", "hqr-backend-sub4"]
 }
 
-variable "schemas_created" {
-  description = "List of all schema's exists"
-  type        = list(any)
-}
-
 variable "fleur-cidr-block" {
   type    = string
   default = "150.0.0.0/16"
@@ -60,7 +55,7 @@ variable "enable_classiclink_dns_support" {
 
 variable "region" {
   type    = string
-  default = "us-west-2"
+  default = "us-east-1"
 }
 
 variable "sonar_port" {
@@ -90,7 +85,7 @@ variable "instance_class" {
 
 variable "databases_created" {
   description = "List of all databases Created!!!"
-  type        = list(any)
+  type        = list(string)
   default     = ["my_db1", "cypress_test"]
 }
 
@@ -156,6 +151,42 @@ variable "db_users_privileges" {
     database   = string
   }))
   default = []
+}
+
+variable "schemas_list_owners" {
+  description = <<-EOT
+  If a schemas in this map does not also exist in the onwers list, it will be ignored.
+  Example usage of schemas:
+  ```schemas = [
+    {
+      database   = "postgres"
+      name_of_theschema = "EXAMPLE_PUBLIC"
+      onwer = "EXAMPLE_POSTGRES"
+      policy {
+        usage = true/false # yes to grant usage on schema
+        role = "ROLE/USER" # The role/user to which this schema would be granted access to
+      }
+        # app_releng can create new objects in the schema.  This is the role that
+         # migrations are executed as.
+      policy {
+      with_create_object = true/false
+      with_usage = true/false
+      role_name  = "postgres" if false null
+  }
+      ]```
+  Note: An empty objects list applies the privilege on all database objects matching the type provided.
+  For information regarding types and privileges, refer to: https://www.postgresql.org/docs/13/ddl-priv.html
+  EOT
+  type = list(object({
+    database           = string
+    name_of_theschema  = string
+    onwer              = string
+    usage              = bool
+    role               = string
+    with_create_object = bool
+    with_usage         = bool
+    role_name          = string
+  }))
 }
 
 variable "name_prefix" {

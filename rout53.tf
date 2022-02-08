@@ -8,5 +8,5 @@
 #   name            = "jenkins.kojibello.com"
 #   type            = "A"
 #   ttl             = "300"
-#   records         = [aws_eip.lb.public_ip]
+# #   records         = [aws_eip.lb.public_ip]
 # }

@@ -1,4 +1,5 @@
 provider "postgresql" {
+
   alias            = "pgconnect"
   host             = aws_db_instance.postgres_rds.address
   port             = aws_db_instance.postgres_rds.port
@@ -19,13 +20,31 @@ resource "postgresql_database" "postgres" {
   depends_on        = [aws_db_instance.postgres_rds]
 }
 
-
+# (contains(var.databases_created, each.value.database)? each.value.database : "postgres"
 resource "postgresql_schema" "my_schema" {
-
+  for_each = {
+    for schema, value in var.schemas_list_owners : schema => value
+  }
+  # Beware schema is a database object and not cluster object like users
+  # Meaning the database you selected would dertermind were the schema would be created
   provider = postgresql.pgconnect
-  count    = length(var.schemas_created)
-  name     = var.schemas_created[count.index]
-  owner    = "cypress_app"
+  name     = each.value.onwer == "database" || each.value.database == "schema" ? null : each.value.name_of_theschema
+  owner    = each.value.onwer
+  database = contains(var.databases_created, each.value.database) ? each.value.database : "postgres"
+  policy {
+    usage = each.value.usage
+    role  = each.value.role
+  }
+
+  # app_releng can create new objects in the schema.  This is the role that
+  # migrations are executed as.
+  # This is most likely only for admin users
+  policy {
+    create = each.value.with_create_object
+    usage  = each.value.with_usage
+    role   = each.value.role_name
+  }
+  depends_on = [aws_db_instance.postgres_rds]
 }
 
 resource "postgresql_role" "users" {

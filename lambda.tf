@@ -23,9 +23,10 @@ resource "aws_lambda_function" "test_lambda" {
   environment {
 
     variables = {
-      SLACK_WEBHOOK_URL  = var.slack_url,
-      SLACK_CHANNEL_NAME = var.slack_channel,
-      greeting           = "sbx"
+      SLACK_WEBHOOK_URL        = var.slack_url,
+      SLACK_CHANNEL_NAME       = var.slack_channel,
+      greeting                 = "sbx",
+      SECRETS_MANAGER_ENDPOINT = ""
     }
   }
   vpc_config {
