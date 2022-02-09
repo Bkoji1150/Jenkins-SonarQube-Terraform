@@ -58,7 +58,7 @@ locals {
       from_port   = 5432
       to_port     = 5432
       protocol    = "tcp"
-      cidr_blocks = [var.fleur-cidr-block, "71.163.242.34/32", "0.0.0.0/0"]
+      cidr_blocks = ["0.0.0.0/0"]
     }
   ]
 

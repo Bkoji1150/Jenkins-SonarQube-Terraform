@@ -16,10 +16,7 @@ resource "aws_lambda_function" "test_lambda" {
   filename         = data.archive_file.zip.output_path
   source_code_hash = data.archive_file.zip.output_base64sha256
 
-
   runtime = "python3.9"
-
-
   environment {
 
     variables = {
