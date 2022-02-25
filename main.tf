@@ -130,5 +130,18 @@ resource "aws_db_subnet_group" "flour_rds_subnetgroup" {
   tags = {
     Name = "flour_rds_subnetgroup"
   }
+}
 
+
+
+module "docker_image" {
+  source = "terraform-aws-modules/lambda/aws//modules/docker-build"
+
+  create_ecr_repo = true
+  ecr_repo        = "my-cool-ecr-repo"
+  image_tag       = "1.0"
+  source_path     = "context"
+  build_args      = {
+    FOO = "bar"
+  }
 }

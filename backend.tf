@@ -3,7 +3,7 @@ terraform {
     organization = "hqr-blesses"
 
     workspaces {
-      name = "hqr-operational-enviroment"
+      name = "hqr_operational_enviroment"
     }
   }
 }
