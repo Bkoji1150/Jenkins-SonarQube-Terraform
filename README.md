@@ -28,6 +28,7 @@ This module was built using [Jenkins-SonarQube-Terraform](git@github.com:Bkoji11
 | Name | Source | Version |
 |------|--------|---------|
 | <a name="module_db_option_group"></a> [db\_option\_group](#module\_db\_option\_group) | ./modules/db_option_group | n/a |
+| <a name="module_docker_image"></a> [docker\_image](#module\_docker\_image) | terraform-aws-modules/lambda/aws//modules/docker-build | n/a |
 
 ## Resources
 
