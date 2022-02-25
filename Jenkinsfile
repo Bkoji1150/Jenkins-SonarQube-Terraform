@@ -14,6 +14,11 @@ pipeline {
 //     }
 
     stages {
+        stage('Checkout') {
+            steps {
+                checkout([$class: 'GitSCM', branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/Bkoji1150/hqr-operational-enviroment.git']]])
+            }
+        }
         stage('Plan') {
             steps {
                 script {
