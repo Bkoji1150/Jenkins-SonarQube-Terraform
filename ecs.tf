@@ -9,41 +9,6 @@ locals {
   operational_environment_ecr = "735972722491.dkr.ecr.us-east-1.amazonaws.com/aws-eksnginx"
 }
 
-module "ecs" {
-  source = "terraform-aws-modules/ecs/aws"
-
-  name = "HQR-PROCESS-HOST"
-
-  container_insights = true
-
-  capacity_providers = ["FARGATE", "FARGATE_SPOT"]
-
-  default_capacity_provider_strategy = [
-    {
-      capacity_provider = "FARGATE_SPOT"
-    }
-  ]
-
-  tags = {
-    Environment = "Development"
-  }
-}
-
-module "alb" {
-  source                            = "git::git@github.com:Bkoji1150/3-TIER-TARRAFORM-PROJECT.git//loadbalancing"
-  public_sg                         = [aws_security_group.fleur-public-security-group.id]
-  public_subnets                    = aws_subnet.fleur-public-subnet.*.id
-  tg_port                           = 80 # 0
-  tg_portocol                       = "HTTP"
-  vpc_id                            = aws_vpc.fleur-vpc[0].id
-  Project-Omega_healthy_threshold   = 2
-  Project-Omega_unhealthy_threshold = 2
-  lb_timeout                        = 3
-  lb_interval                       = 30
-  listener_port                     = 80
-  listener_protocol                 = "HTTP"
-}
-
 resource "aws_security_group" "ecs" {
   name        = "ecs_security_group"
   description = format("%s-%s-%s", var.cell_name, var.component_name, "ecs_Sucurity_Group")
@@ -64,7 +29,7 @@ resource "aws_security_group" "ecs" {
 }
 
 module "microservice" {
-  source = "./ecs"
+  source = "./ecs" # git::git@github.com:Bkoji1150/hqr-operational-enviroment.git//
 
   vpc_id                         = local.operational_environment
   tier                           = "APP"
@@ -73,17 +38,19 @@ module "microservice" {
   container_port                 = var.container_port
   container_version              = var.container_image_version
   container_source               = var.container_image_source
+  name                           = var.service_tier
   ecs_service_subnet_ids         = local.subnet_ids
-  cluster_name                   = module.ecs.ecs_cluster_name
+  cluster_name                   = module.microservice.ecs_cluster_name
   ecs_service_sg_ids             = [aws_security_group.ecs.id]
   ecs_service_desired_count      = var.ecs_service_desired_count
   lb_listener_paths              = [var.lb_listener_path]
-  lb_listener_arn                = module.alb.loadBalancingSecurityGroup
+  lb_listener_arn                = module.microservice.target_group_arn
   target_group_health_check_path = var.target_group_health_check_path
   container_name                 = var.component_name
-  container_image                = local.operational_environment_ecr
-  container_image_source         = var.container_image_source
-  container_image_version        = var.container_image_version
+  assign_public_ip               = true
+
+  container_image_source  = "ecr"
+  container_image_version = var.container_image_version
 
   container_port_mappings = [{
     containerPort = var.container_port

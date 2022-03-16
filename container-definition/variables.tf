@@ -82,7 +82,6 @@ variable "working_directory" {
 }
 
 variable "container_source" {
-
 }
 variable "ecr_account_id" {
 

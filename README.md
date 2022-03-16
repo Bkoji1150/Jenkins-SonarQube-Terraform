@@ -27,9 +27,7 @@ This module was built using [Jenkins-SonarQube-Terraform](git@github.com:Bkoji11
 
 | Name | Source | Version |
 |------|--------|---------|
-| <a name="module_alb"></a> [alb](#module\_alb) | git::git@github.com:Bkoji1150/3-TIER-TARRAFORM-PROJECT.git//loadbalancing | n/a |
 | <a name="module_db_option_group"></a> [db\_option\_group](#module\_db\_option\_group) | ./modules/db_option_group | n/a |
-| <a name="module_ecs"></a> [ecs](#module\_ecs) | terraform-aws-modules/ecs/aws | n/a |
 | <a name="module_microservice"></a> [microservice](#module\_microservice) | ./ecs | n/a |
 
 ## Resources
@@ -88,7 +86,7 @@ This module was built using [Jenkins-SonarQube-Terraform](git@github.com:Bkoji11
 | <a name="input_ca_cert_identifier"></a> [ca\_cert\_identifier](#input\_ca\_cert\_identifier) | Specifies the identifier of the CA certificate for the DB instance | `string` | `null` | no |
 | <a name="input_cell_name"></a> [cell\_name](#input\_cell\_name) | Name of the cell. | `string` | `"reporting-frontend"` | no |
 | <a name="input_character_set_name"></a> [character\_set\_name](#input\_character\_set\_name) | (Optional) The character set name to use for DB encoding in Oracle instances. This can't be changed. See Oracle Character Sets Supported in Amazon RDS and Collations and Character Sets for Microsoft SQL Server for more information. This can only be set on creation. | `string` | `null` | no |
-| <a name="input_component_name"></a> [component\_name](#input\_component\_name) | Name of the component. | `string` | `"reports-ui-microservice"` | no |
+| <a name="input_component_name"></a> [component\_name](#input\_component\_name) | Name of the component. | `string` | `"aws-eksnginx"` | no |
 | <a name="input_container_image_source"></a> [container\_image\_source](#input\_container\_image\_source) | Where to fetch the container image. ecr or dockerhub | `string` | `"ecr"` | no |
 | <a name="input_container_image_version"></a> [container\_image\_version](#input\_container\_image\_version) | Version of the container image to deploy. | `string` | n/a | yes |
 | <a name="input_container_port"></a> [container\_port](#input\_container\_port) | Port that this service will listen on. | `number` | `"80"` | no |
@@ -191,7 +189,7 @@ This module was built using [Jenkins-SonarQube-Terraform](git@github.com:Bkoji11
 | <a name="input_storage_type"></a> [storage\_type](#input\_storage\_type) | One of 'standard' (magnetic), 'gp2' (general purpose SSD), or 'io1' (provisioned IOPS SSD). The default is 'io1' if iops is specified, 'gp2' if not. | `string` | `null` | no |
 | <a name="input_subnet_ids"></a> [subnet\_ids](#input\_subnet\_ids) | A list of VPC subnet IDs | `list(string)` | `[]` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | A mapping of tags to assign to all resources | `map(string)` | `{}` | no |
-| <a name="input_target_group_health_check_path"></a> [target\_group\_health\_check\_path](#input\_target\_group\_health\_check\_path) | Path that will be used to perform the health check of the ECS service. | `string` | `"/index.html/*"` | no |
+| <a name="input_target_group_health_check_path"></a> [target\_group\_health\_check\_path](#input\_target\_group\_health\_check\_path) | Path that will be used to perform the health check of the ECS service. | `string` | `"/"` | no |
 | <a name="input_tech_poc_primary"></a> [tech\_poc\_primary](#input\_tech\_poc\_primary) | Primary Point of Contact for Technical support for this service. | `string` | `"hqr-feedback-and-support-product@bellese.io"` | no |
 | <a name="input_tech_poc_secondary"></a> [tech\_poc\_secondary](#input\_tech\_poc\_secondary) | Secondary Point of Contact for Technical support for this service. | `string` | `"hqr-devops@bellese.io"` | no |
 | <a name="input_tenable_user"></a> [tenable\_user](#input\_tenable\_user) | RDS Teneble users | `string` | `"postgres_aa2"` | no |

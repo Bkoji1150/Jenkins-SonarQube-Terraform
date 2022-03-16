@@ -69,8 +69,8 @@ locals {
   user = var.firelens_configuration != null ? "0" : var.user
 
   container_definition = {
-    container              = var.container_name
-    container              = var.container_image
+    name                   = var.container_name
+    image                  = lower(var.container_source) == "ecr" ? local.container_image : var.container_image
     essential              = var.essential
     entryPoint             = var.entrypoint
     command                = var.command

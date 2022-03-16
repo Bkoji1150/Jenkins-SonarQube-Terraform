@@ -14,6 +14,8 @@ variable "cluster_name" {
   default     = null
 }
 
+variable "name" {}
+
 variable "cfqn_name" {
   description = "Cell Fully Qualified Name. Will be used to name the ECS Service, Target Group, Task Definition and Container."
   type        = string
@@ -27,21 +29,26 @@ variable "component_name" {
 variable "container_name" {
   description = ""
   type        = string
-  default     = "Nginx"
 }
 
 variable "container_image" {
   type        = string
   description = "The image used to start a container. Up to 255 letters (uppercase and lowercase), numbers, hyphens, underscores, colons, periods, forward slashes, and number signs are allowed."
+  default     = null
 }
-
+variable "assign_public_ip" {
+  type        = bool
+  description = "Would you like to allow public ip"
+}
 variable "ecr_account_id" {
   type        = string
   description = "The ID of the account to which the ECR repository belongs."
   default     = "735972722491"
 }
 
-variable "container_source" {}
+variable "container_source" {
+  default = "ecr"
+}
 
 #variable "tags" {
 #  description = "Tags to apply to the IAM module resource."
@@ -81,7 +88,7 @@ variable "container_image_source" {
 variable "container_image_version" {
   description = "Version of the container image to deploy."
   type        = string
-  default     = null
+
 }
 
 variable "container_cpu" {

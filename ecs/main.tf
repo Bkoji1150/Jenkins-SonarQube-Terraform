@@ -4,7 +4,7 @@ locals {
   network_configuration = var.container_launch_type == "FARGATE" ? [{
     subnets          = var.ecs_service_subnet_ids
     security_groups  = var.ecs_service_sg_ids
-    assign_public_ip = false
+    assign_public_ip = var.assign_public_ip
   }] : []
   target_group_stickiness = var.target_group_stickiness == null ? [] : [var.target_group_stickiness]
   # If we pass in a json key for a Secrets Manager secret, we need to strip it off for the IAM policy
@@ -55,11 +55,12 @@ resource "aws_iam_role" "iam_for_ecs" {
 }
 
 module "container_definition" {
-  source                       = "../container-definition"
+  source = "../container-definition" # git::git@github.com:Bkoji1150/hqr-operational-enviroment.git//
+
   container_name               = var.container_name
   container_image              = var.container_image
   container_version            = var.container_image_version
-  container_source             = var.container_image_source
+  container_source             = var.container_source
   container_memory             = var.container_memory
   container_memory_reservation = var.container_memory_reservation
   port_mappings                = var.container_port_mappings
@@ -92,9 +93,9 @@ module "container_definition" {
 }
 
 resource "aws_ecs_task_definition" "task_definition" {
-  family                = var.cfqn_name
-  container_definitions = module.container_definition.json
 
+  family                   = var.cfqn_name
+  container_definitions    = module.container_definition.json
   cpu                      = var.task_cpu
   memory                   = var.task_memory
   requires_compatibilities = [var.container_launch_type]

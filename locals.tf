@@ -100,13 +100,12 @@ locals {
     redshift          = "redshift"
   }
   default_tags = {
-    component_name          = "hqr-bellese"
-    Created_by              = "devops@hqr.io"
-    App_Name                = "ovid"
-    Cost_center             = "xyz222"
-    Business_unit           = "GBS"
-    App_role                = "web_server"
-    Environment             = "dev"
-    Security_Classification = "Internal"
+    Env               = lower(terraform.workspace)
+    service_name      = "reporting"
+    cell_name         = "reporting-frontend"
+    component_name    = "aws-eksnginx"
+    service_tier      = "WEB"
+    builder           = "hqr-devops@bellese.io"
+    application_owner = "hqr-feedback-and-support-product@bellese.io"
   }
 }
