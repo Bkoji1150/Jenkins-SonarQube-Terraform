@@ -75,16 +75,7 @@ db_users_privileges = [
 ]
 
 schemas_list_owners = [
-  {
-    database           = "postgres"
-    name_of_theschema  = "monolic"
-    onwer              = "cypress_app"
-    usage              = true
-    role               = null
-    with_create_object = true
-    with_usage         = true
-    role_name          = "cypress_app"
-  },
+
   {
     database           = "postgres"
     name_of_theschema  = "cypress_schema"

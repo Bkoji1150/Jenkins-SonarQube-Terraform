@@ -18,6 +18,7 @@ variable "map-public-ip" {
   default = true
 }
 
+
 variable "create_vpc" {
   description = "Controls if VPC should be created (it affects almost all resources)"
   type        = bool
@@ -75,7 +76,7 @@ variable "db_storage" {
 
 variable "engine_version" {
   description = "Hqr postgres db version"
-  default     = "10.6"
+  default     = "9.6"
 }
 variable "instance_class" {
   description = "hqr db instance class"
@@ -247,4 +248,14 @@ variable "typ" {
   description = "type"
   type        = bool
   default     = true
+}
+
+variable "fargate_cpu" {
+  description = "Fargate instance CPU units to provision (1 vCPU = 1024 CPU units)"
+  default     = "1024"
+}
+
+variable "fargate_memory" {
+  description = "Fargate instance memory to provision (in MiB)"
+  default     = "2048"
 }

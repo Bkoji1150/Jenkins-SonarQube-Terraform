@@ -2,14 +2,11 @@
 locals {
   master_password      = var.create_db_instance && var.create_random_password ? random_string.master_user_password.result : var.password
   db_subnet_group_name = !var.cross_region_replica && var.replicate_source_db != null ? null : coalesce(var.db_subnet_group_name, aws_db_subnet_group.flour_rds_subnetgroup[0].id, var.identifie)
-
-  parameter_group_name_id = var.create_db_parameter_group ? aws_db_parameter_group.Postgres_parameter_group.id : var.parameter_group_name
-
+  #  parameter_group_name_id = var.create_db_parameter_group ? aws_db_parameter_group.Postgres_parameter_group.id : var.parameter_group_name
   create_db_option_group = var.create_db_option_group && var.engine != "postgres"
   option_group           = local.create_db_option_group ? module.db_option_group.db_option_group_id : var.option_group_name
-
-  db_tenable_user = "postgres_aa2"
-  secrets         = jsondecode(aws_secretsmanager_secret_version.master_secret_value.secret_string)
+  db_tenable_user        = "postgres_aa2"
+  secrets                = jsondecode(aws_secretsmanager_secret_version.master_secret_value.secret_string)
 }
 
 module "db_option_group" {
@@ -81,11 +78,10 @@ resource "aws_db_instance" "postgres_rds" {
   engine_version    = var.engine_version
   instance_class    = var.instance_class
 
-  name                   = local.secrets["username"]
-  port                   = local.secrets["port"]
-  username               = local.secrets["dbname"]
-  password               = local.secrets["password"]
-  parameter_group_name   = aws_db_parameter_group.Postgres_parameter_group.id
+  port     = local.secrets["port"]
+  username = local.secrets["dbname"]
+  password = local.secrets["password"]
+  #  parameter_group_name   = aws_db_parameter_group.Postgres_parameter_group.id
   vpc_security_group_ids = [aws_security_group.fleur-private-security-group.id]
 
   identifier           = var.db_clusters.identifier
@@ -105,16 +101,16 @@ resource "aws_db_instance" "postgres_rds" {
   }
 }
 
-resource "aws_db_parameter_group" "Postgres_parameter_group" {
-  name_prefix = "postgresrds"
-  family      = "postgres10"
-
-  parameter {
-    name         = "log_connections"
-    value        = 1
-    apply_method = "immediate"
-  }
-  lifecycle {
-    create_before_destroy = true
-  }
-}
+#resource "aws_db_parameter_group" "Postgres_parameter_group" {
+#  name_prefix = "postgresrds"
+#  family      = "postgres12"
+#
+#  parameter {
+#    name         = "log_connections"
+#    value        = 1
+#    apply_method = "immediate"
+#  }
+#  lifecycle {
+#    create_before_destroy = true
+#  }
+#}

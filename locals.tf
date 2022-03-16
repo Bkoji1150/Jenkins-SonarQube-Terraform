@@ -1,10 +1,11 @@
 locals {
-  ingress_rules = [{
-    to_port     = 8080
-    description = "Allow jenkins port"
-    protocol    = "tcp"
-    from_port   = 8080
-    cidr_blocks = ["0.0.0.0/0"]
+  ingress_rules = [
+    {
+      to_port     = 8080
+      description = "Allow jenkins port"
+      protocol    = "tcp"
+      from_port   = 8080
+      cidr_blocks = ["0.0.0.0/0"]
     },
     {
       to_port     = 22
@@ -61,6 +62,15 @@ locals {
       cidr_blocks = ["0.0.0.0/0"]
     }
   ]
+  ecs = [
+    {
+      description = format("%s-%s-%s", var.cell_name, var.component_name, "ecs_security_group")
+      from_port   = var.container_port
+      to_port     = var.container_port
+      protocol    = "tcp"
+      cidr_blocks = ["71.163.242.34/32"]
+    }
+  ]
 
   egree_rule = [{
     from_port        = 0
@@ -90,7 +100,7 @@ locals {
     redshift          = "redshift"
   }
   default_tags = {
-    Name                    = "hqr-bellese"
+    component_name          = "hqr-bellese"
     Created_by              = "devops@hqr.io"
     App_Name                = "ovid"
     Cost_center             = "xyz222"

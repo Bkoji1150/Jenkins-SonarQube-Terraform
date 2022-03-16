@@ -24,9 +24,6 @@ resource "aws_subnet" "fleur-public-subnet" {
   cidr_block              = [for i in range(0, 100, 2) : cidrsubnet(var.fleur-cidr-block, 8, i)][count.index]
   availability_zone       = data.aws_availability_zones.fleur-zone.names[count.index]
   map_public_ip_on_launch = true
-  tags = {
-    Name = var.public-subnet[count.index]
-  }
 }
 
 resource "aws_subnet" "fleur-private-subnet" {
@@ -35,9 +32,6 @@ resource "aws_subnet" "fleur-private-subnet" {
   vpc_id            = aws_vpc.fleur-vpc[0].id
   cidr_block        = [for i in range(1, 100, 2) : cidrsubnet(var.fleur-cidr-block, 8, i)][count.index]
   availability_zone = data.aws_availability_zones.fleur-zone.names[count.index]
-  tags = {
-    Name = var.private-subnet[count.index]
-  }
 }
 
 resource "aws_internet_gateway" "fleur-gateway" {
@@ -65,12 +59,10 @@ resource "aws_route_table_association" "fleur-public-rt-association" {
 
 resource "aws_default_route_table" "fleur-route-ass" {
   default_route_table_id = aws_vpc.fleur-vpc[0].default_route_table_id
-  tags = {
-    name = "fleur-route-ass"
-  }
 }
 
 resource "aws_security_group" "fleur-public-security-group" {
+
   name        = "Public access"
   description = "Allow TCP inbound traffic"
   vpc_id      = aws_vpc.fleur-vpc[0].id
@@ -99,7 +91,6 @@ resource "aws_security_group" "fleur-public-security-group" {
       ipv6_cidr_blocks = foo.value.ipv6_cidr_blocks
     }
   }
-
 }
 
 resource "aws_security_group" "fleur-private-security-group" {
@@ -127,21 +118,4 @@ resource "aws_db_subnet_group" "flour_rds_subnetgroup" {
   subnet_ids = concat(
     slice(aws_subnet.fleur-public-subnet.*.id, 0, 3)
   )
-  tags = {
-    Name = "flour_rds_subnetgroup"
-  }
-}
-
-
-
-module "docker_image" {
-  source = "terraform-aws-modules/lambda/aws//modules/docker-build"
-
-  create_ecr_repo = true
-  ecr_repo        = "my-cool-ecr-repo"
-  image_tag       = "1.0"
-  source_path     = "context"
-  build_args = {
-    FOO = "bar"
-  }
 }
