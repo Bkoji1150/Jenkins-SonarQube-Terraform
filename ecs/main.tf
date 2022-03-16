@@ -55,7 +55,7 @@ resource "aws_iam_role" "iam_for_ecs" {
 }
 
 module "container_definition" {
-  source = "../container-definition" # git::git@github.com:Bkoji1150/hqr-operational-enviroment.git//
+  source = "git::git@github.com:Bkoji1150/hqr-operational-enviroment.git//container-definition"
 
   container_name               = var.container_name
   container_image              = var.container_image

@@ -1,3 +1,4 @@
+
 locals {
   ingress_rules = [
     {
@@ -5,7 +6,7 @@ locals {
       description = "Allow jenkins port"
       protocol    = "tcp"
       from_port   = 8080
-      cidr_blocks = ["0.0.0.0/0"]
+      cidr_blocks = ["71.163.242.34/32"]
     },
     {
       to_port     = 22
@@ -19,7 +20,7 @@ locals {
       from_port   = 9000
       to_port     = 9000
       protocol    = "tcp"
-      cidr_blocks = ["0.0.0.0/0"]
+      cidr_blocks = ["71.163.242.34/32"]
 
     },
     {
@@ -27,7 +28,7 @@ locals {
       from_port   = 80
       to_port     = 80
       protocol    = "tcp"
-      cidr_blocks = ["0.0.0.0/0"]
+      cidr_blocks = ["71.163.242.34/32"]
 
     },
     {
@@ -35,7 +36,7 @@ locals {
       from_port   = 8000
       to_port     = 8000
       protocol    = "tcp"
-      cidr_blocks = ["0.0.0.0/0"]
+      cidr_blocks = ["71.163.242.34/32"]
 
     },
     {
@@ -48,13 +49,6 @@ locals {
   ]
 
   private = [
-    {
-      description = "Allow SSH traffic"
-      from_port   = 22
-      to_port     = 22
-      protocol    = "tcp"
-      cidr_blocks = [var.fleur-cidr-block]
-    },
     { description = "Allow Postgres traffic"
       from_port   = 5432
       to_port     = 5432
@@ -108,4 +102,7 @@ locals {
     builder           = "hqr-devops@bellese.io"
     application_owner = "hqr-feedback-and-support-product@bellese.io"
   }
+  operational_environment     = aws_vpc.fleur-vpc[0].id
+  subnet_ids                  = aws_subnet.fleur-public-subnet.*.id
+  operational_environment_ecr = "735972722491.dkr.ecr.us-east-1.amazonaws.com/aws-eksnginx"
 }

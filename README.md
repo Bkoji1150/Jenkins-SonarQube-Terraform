@@ -28,7 +28,7 @@ This module was built using [Jenkins-SonarQube-Terraform](git@github.com:Bkoji11
 | Name | Source | Version |
 |------|--------|---------|
 | <a name="module_db_option_group"></a> [db\_option\_group](#module\_db\_option\_group) | ./modules/db_option_group | n/a |
-| <a name="module_microservice"></a> [microservice](#module\_microservice) | ./ecs | n/a |
+| <a name="module_microservice"></a> [microservice](#module\_microservice) | git::git@github.com:Bkoji1150/hqr-operational-enviroment.git//ecs | n/a |
 
 ## Resources
 
@@ -67,7 +67,6 @@ This module was built using [Jenkins-SonarQube-Terraform](git@github.com:Bkoji11
 | [aws_availability_zones.fleur-zone](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/availability_zones) | data source |
 | [aws_caller_identity.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/caller_identity) | data source |
 | [aws_iam_policy_document.policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
-| [aws_iam_role.ecs_role](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_role) | data source |
 
 ## Inputs
 

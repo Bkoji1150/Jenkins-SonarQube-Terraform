@@ -78,10 +78,9 @@ resource "aws_db_instance" "postgres_rds" {
   engine_version    = var.engine_version
   instance_class    = var.instance_class
 
-  port     = local.secrets["port"]
-  username = local.secrets["dbname"]
-  password = local.secrets["password"]
-  #  parameter_group_name   = aws_db_parameter_group.Postgres_parameter_group.id
+  port                   = local.secrets["port"]
+  username               = local.secrets["dbname"]
+  password               = local.secrets["password"]
   vpc_security_group_ids = [aws_security_group.fleur-private-security-group.id]
 
   identifier           = var.db_clusters.identifier

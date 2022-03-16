@@ -5,5 +5,5 @@ output "target_group_arn" {
 
 output "ecs_cluster_name" {
   description = "The name of the ECS cluster"
-  value       = var.name
+  value       = aws_ecs_service.ecs_service.name
 }
