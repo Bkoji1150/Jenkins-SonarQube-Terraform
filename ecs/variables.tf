@@ -89,6 +89,7 @@ variable "container_image_source" {
 variable "container_image_version" {
   description = "Version of the container image to deploy."
   type        = string
+  default = null
 
 }
 
