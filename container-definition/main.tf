@@ -43,7 +43,7 @@ locals {
     var.ecr_account_id,
     var.container_name,
     var.container_version
-  ) : ""
+  ) : var.container_image
 
 
   # https://www.terraform.io/docs/configuration/expressions.html#null
