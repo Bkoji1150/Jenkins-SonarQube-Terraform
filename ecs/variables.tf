@@ -59,6 +59,7 @@ variable "container_source" {
 #  }
 #}
 variable "container_version" {
+    default = null
 
 }
 variable "task_execution_role_name" {
