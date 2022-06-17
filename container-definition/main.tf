@@ -38,13 +38,7 @@ locals {
   ]
   final_secrets = length(local.sorted_secrets) > 0 ? local.sorted_secrets : null
 
-  container_image = lower(var.container_source) == "ecr" ? format(
-    "%s.dkr.ecr.us-east-1.amazonaws.com/%s:%s",
-    var.ecr_account_id,
-    var.container_name,
-    var.container_version
-  ) : ""
-
+  container_image = var.container_image
 
   # https://www.terraform.io/docs/configuration/expressions.html#null
   final_environment_vars = length(local.sorted_environment_vars) > 0 ? local.sorted_environment_vars : null
