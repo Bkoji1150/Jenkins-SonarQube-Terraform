@@ -350,6 +350,7 @@ variable "lb_listener_arn" {
 variable "ecs_service_desired_count" {
   description = "Number of tasks to launch in the ECS service."
   type        = number
+  default = 1
 }
 
 variable "ecs_service_subnet_ids" {
