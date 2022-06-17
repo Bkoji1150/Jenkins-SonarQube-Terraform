@@ -331,7 +331,7 @@ variable "ecs_service_desired_count" {
 variable "lb_listener_path" {
   description = "Path that will be used to route traffic from the load balancer to the ECS service."
   type        = string
-  default     = "/index.html/*"
+  default     = null
 }
 
 variable "target_group_health_check_path" {
