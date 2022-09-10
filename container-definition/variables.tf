@@ -81,16 +81,6 @@ variable "working_directory" {
   default     = null
 }
 
-variable "container_source" {
-}
-variable "ecr_account_id" {
-
-}
-
-variable "container_version" {
-
-}
-
 variable "environment" {
   type = list(object({
     name  = string
@@ -193,11 +183,13 @@ variable "mount_points" {
   type = list(object({
     containerPath = string
     sourceVolume  = string
+    readOnly      = bool
   }))
 
   description = "Container mount points. This is a list of maps, where each map should contain `containerPath`, `sourceVolume` and `readOnly`"
   default     = []
 }
+
 
 variable "dns_servers" {
   type        = list(string)

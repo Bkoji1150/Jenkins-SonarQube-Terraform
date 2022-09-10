@@ -14,9 +14,7 @@ variable "cluster_name" {
   default     = null
 }
 
-variable "name" {}
-
-variable "cfqn_name" {
+variable "ecs_service_name" {
   description = "Cell Fully Qualified Name. Will be used to name the ECS Service, Target Group, Task Definition and Container."
   type        = string
 }
@@ -31,41 +29,21 @@ variable "container_name" {
   type        = string
 }
 
-variable "container_image" {
+variable "container_version" {
   type        = string
   description = "The image used to start a container. Up to 255 letters (uppercase and lowercase), numbers, hyphens, underscores, colons, periods, forward slashes, and number signs are allowed."
-  default     = null
+  default     = "latest"
 }
+
 variable "assign_public_ip" {
   type        = bool
   description = "Would you like to allow public ip"
+  default     = false
 }
 variable "ecr_account_id" {
   type        = string
   description = "The ID of the account to which the ECR repository belongs."
   default     = "735972722491"
-}
-
-variable "container_source" {
-  default = "ecr"
-}
-
-#variable "tags" {
-#  description = "Tags to apply to the IAM module resource."
-#  type        = map(any)
-#  validation {
-#    condition     = length(var.tags) >= 9 && contains(keys(var.tags), “ado”) && contains(keys(var.tags), “cell-name”) && contains(keys(var.tags), “component-name”)
-#    error_message = “Tags for this module must contain the minimum keys from the `bellese-tf-aws-required-tags`  module.”
-#  }
-#}
-variable "container_version" {
-    default = null
-
-}
-variable "task_execution_role_name" {
-  description = "Name of the IAM role to be used at the task execution role in the task definition"
-  type        = string
-  default     = null
 }
 
 # Container Definition variables
@@ -84,13 +62,7 @@ variable "container_network_mode" {
 variable "container_image_source" {
   description = "Either `dockerhub` or `ecr`."
   type        = string
-}
-
-variable "container_image_version" {
-  description = "Version of the container image to deploy."
-  type        = string
-  default = null
-
+  default     = "ecr"
 }
 
 variable "container_cpu" {
@@ -350,7 +322,7 @@ variable "lb_listener_arn" {
 variable "ecs_service_desired_count" {
   description = "Number of tasks to launch in the ECS service."
   type        = number
-  default = 1
+  default     = 1
 }
 
 variable "ecs_service_subnet_ids" {
@@ -464,6 +436,7 @@ variable "container_mount_points" {
   type = list(object({
     containerPath = string
     sourceVolume  = string
+    readOnly      = bool
   }))
   default = null
 }

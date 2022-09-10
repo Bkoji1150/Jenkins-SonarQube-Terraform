@@ -1,7 +1,7 @@
 # https://github.com/cloudposse/terraform-aws-ecs-container-definition
 
 locals {
-  # Sort environment variables so terraform will not try to recreate on each plan/apply
+
   env_vars_keys        = var.map_environment != null ? keys(var.map_environment) : var.environment != null ? [for m in var.environment : lookup(m, "name")] : []
   env_vars_values      = var.map_environment != null ? values(var.map_environment) : var.environment != null ? [for m in var.environment : lookup(m, "value")] : []
   env_vars_as_map      = zipmap(local.env_vars_keys, local.env_vars_values)
@@ -38,8 +38,6 @@ locals {
   ]
   final_secrets = length(local.sorted_secrets) > 0 ? local.sorted_secrets : null
 
-  container_image = var.container_image
-
   # https://www.terraform.io/docs/configuration/expressions.html#null
   final_environment_vars = length(local.sorted_environment_vars) > 0 ? local.sorted_environment_vars : null
   final_secrets_vars     = length(local.sorted_secrets_vars) > 0 ? local.sorted_secrets_vars : null
@@ -64,7 +62,7 @@ locals {
 
   container_definition = {
     name                   = var.container_name
-    image                  = lower(var.container_source) == "ecr" ? local.container_image : var.container_image
+    image                  = var.container_image
     essential              = var.essential
     entryPoint             = var.entrypoint
     command                = var.command
