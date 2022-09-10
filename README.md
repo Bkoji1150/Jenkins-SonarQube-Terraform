@@ -45,40 +45,7 @@ module "microservice" {
     }
     secretOptions = null
   }
-  container_environment_variables = [
-    {
-      name  = "DJANGO_SECRET_KEY"
-      value = var.django_secret_key
-    },
-    {
-      name  = "DB_HOST"
-      value = local.cluster_endpoint
-    },
-    {
-      name  = "DB_NAME"
-      value = local.cluster_database_name
-    },
-    {
-      name  = "DB_USER"
-      value = local.cluster_database_user
-    },
-    {
-      name  = "DB_PASS"
-      value = local.cluster_database_password
-    },
-    {
-      name  = "ALLOWED_HOSTS"
-      value = aws_route53_record.app.fqdn
-    },
-    {
-      name  = "S3_STORAGE_BUCKET_NAME"
-      value = aws_s3_bucket.app_public_files.bucket
-    },
-    {
-      name  = "S3_STORAGE_BUCKET_REGION"
-      value = data.aws_region.current.name
-    }
-  ]
+  container_environment_variables = []
   container_mount_points = [
     {
       readOnly      = false,
