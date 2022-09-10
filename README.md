@@ -10,7 +10,7 @@ This module was built using [Jenkins-SonarQube-Terraform](git@github.com:Bkoji11
 ```hcl
 
 module "microservice" {
-  source = "git::git@github.com:Bkoji1150/hqr-operational-enviroment.git//ecs" # git::git@github.com:Bkoji1150/hqr-operational-enviroment.git//
+  source = "git::git@github.com:Bkoji1150/hqr-operational-enviroment.git//ecs?ref=v1.0.0"
 
   vpc_id           = local.vpc_id
   tier             = var.service_tier
@@ -45,7 +45,10 @@ module "microservice" {
     }
     secretOptions = null
   }
-  container_environment_variables = []
+  container_environment_variables = [{
+    name = "DB_HOST"
+    value = "endpoint"
+  }]
   container_mount_points = [
     {
       readOnly      = false,
