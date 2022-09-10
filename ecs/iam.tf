@@ -1,7 +1,7 @@
 resource "aws_iam_policy" "ecs" {
-  name_prefix = "lambda_logging"
+  name_prefix = format("%s-%s", var.component_name, "ecsRole")
   path        = "/"
-  description = "IAM policy for logging from a lambda"
+  description = "IAM policy to allow ${var.component_name}-ecsRole have access"
 
   policy = <<EOF
 {

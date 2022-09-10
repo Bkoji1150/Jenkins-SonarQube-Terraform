@@ -6,207 +6,166 @@ This module builds the infrastructure for **hqr-operational-enviroment** agen in
 
 This module was built using [Jenkins-SonarQube-Terraform](git@github.com:Bkoji1150/Jenkins-SonarQube-Terraform.git).
 
+## Usage 
+```hcl
+
+module "microservice" {
+  source = "git::git@github.com:Bkoji1150/hqr-operational-enviroment.git//ecs" # git::git@github.com:Bkoji1150/hqr-operational-enviroment.git//
+
+  vpc_id           = local.vpc_id
+  tier             = var.service_tier
+  ecs_service_name = lower(format("%s-%s", var.cell_name, var.component_name))
+  container_name   = var.container_name
+  component_name   = var.component_name
+  container_port   = var.container_port
+
+  create_target_group           = false
+  target_group_arn              = aws_lb_target_group.api.arn
+  lb_listener_paths             = [var.target_group_health_check_path]
+  lb_listener_arn               = aws_lb_listener.api.arn
+  task_definition_task_role_arn = aws_iam_role.app_iam_role.arn
+
+  ecs_service_subnet_ids    = local.private_subnets
+  ecs_service_sg_ids        = [aws_security_group.ecs.id]
+  ecs_service_desired_count = var.ecs_service_desired_count
+
+  container_port_mappings = [{
+    containerPort = var.container_port
+    hostPort      = var.container_port
+    protocol      = "tcp"
+  }]
+
+  container_log_configuration = {
+    logDriver = "awslogs"
+    options = {
+      "awslogs-create-group"  = "true"
+      "awslogs-group"         = var.component_name
+      "awslogs-region"        = var.aws_region
+      "awslogs-stream-prefix" = "ecs-api"
+    }
+    secretOptions = null
+  }
+  container_environment_variables = [
+    {
+      name  = "DJANGO_SECRET_KEY"
+      value = var.django_secret_key
+    },
+    {
+      name  = "DB_HOST"
+      value = local.cluster_endpoint
+    },
+    {
+      name  = "DB_NAME"
+      value = local.cluster_database_name
+    },
+    {
+      name  = "DB_USER"
+      value = local.cluster_database_user
+    },
+    {
+      name  = "DB_PASS"
+      value = local.cluster_database_password
+    },
+    {
+      name  = "ALLOWED_HOSTS"
+      value = aws_route53_record.app.fqdn
+    },
+    {
+      name  = "S3_STORAGE_BUCKET_NAME"
+      value = aws_s3_bucket.app_public_files.bucket
+    },
+    {
+      name  = "S3_STORAGE_BUCKET_REGION"
+      value = data.aws_region.current.name
+    }
+  ]
+  container_mount_points = [
+    {
+      readOnly      = false,
+      containerPath = "/vol/web",
+      sourceVolume  = "static"
+    }
+  ]
+}
+
+```
+
 <!-- prettier-ignore-start -->
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Requirements
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= v1.1.4 |
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >=1.1.5 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 3.0 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_archive"></a> [archive](#provider\_archive) | n/a |
-| <a name="provider_aws"></a> [aws](#provider\_aws) | n/a |
-| <a name="provider_postgresql.pgconnect"></a> [postgresql.pgconnect](#provider\_postgresql.pgconnect) | n/a |
-| <a name="provider_random"></a> [random](#provider\_random) | n/a |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | ~> 3.0 |
+| <a name="provider_template"></a> [template](#provider\_template) | n/a |
+| <a name="provider_terraform"></a> [terraform](#provider\_terraform) | n/a |
 
 ## Modules
 
 | Name | Source | Version |
 |------|--------|---------|
-| <a name="module_db_option_group"></a> [db\_option\_group](#module\_db\_option\_group) | ./modules/db_option_group | n/a |
-| <a name="module_microservice"></a> [microservice](#module\_microservice) | git::git@github.com:Bkoji1150/hqr-operational-enviroment.git//ecs | n/a |
+| <a name="module_acm"></a> [acm](#module\_acm) | terraform-aws-modules/acm/aws | 3.0.0 |
+| <a name="module_microservice"></a> [microservice](#module\_microservice) | ./ecs | n/a |
+| <a name="module_required_tags"></a> [required\_tags](#module\_required\_tags) | git::https://github.com/Bkoji1150/kojitechs-tf-aws-required-tags.git | v1.0.0 |
 
 ## Resources
 
 | Name | Type |
 |------|------|
-| [aws_cloudwatch_log_group.example](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
-| [aws_db_instance.postgres_rds](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/db_instance) | resource |
-| [aws_db_subnet_group.flour_rds_subnetgroup](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/db_subnet_group) | resource |
-| [aws_default_route_table.fleur-route-ass](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/default_route_table) | resource |
-| [aws_iam_policy.lambda_logging](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
-| [aws_iam_role.iam_for_lambda](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
-| [aws_iam_role_policy_attachment.lambda_logs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
-| [aws_internet_gateway.fleur-gateway](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/internet_gateway) | resource |
-| [aws_lambda_function.test_lambda](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_function) | resource |
-| [aws_route_table.fleur-private-route-table](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route_table) | resource |
-| [aws_route_table.fleur-public-route-table](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route_table) | resource |
-| [aws_route_table_association.fleur-public-rt-association](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route_table_association) | resource |
-| [aws_secretsmanager_secret.master_secret](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/secretsmanager_secret) | resource |
-| [aws_secretsmanager_secret.users_secret](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/secretsmanager_secret) | resource |
-| [aws_secretsmanager_secret_version.master_secret_value](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/secretsmanager_secret_version) | resource |
-| [aws_secretsmanager_secret_version.user_secret_value](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/secretsmanager_secret_version) | resource |
+| [aws_iam_policy.ecs_s3_access](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
+| [aws_iam_role.app_iam_role](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
+| [aws_iam_role_policy_attachment.ecs_s3_access](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
+| [aws_lb.alb](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lb) | resource |
+| [aws_lb_listener.api](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lb_listener) | resource |
+| [aws_lb_listener.api_https](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lb_listener) | resource |
+| [aws_lb_target_group.api](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lb_target_group) | resource |
+| [aws_route53_record.app](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route53_record) | resource |
+| [aws_s3_bucket.app_public_files](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket) | resource |
 | [aws_security_group.ecs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
-| [aws_security_group.fleur-private-security-group](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
-| [aws_security_group.fleur-public-security-group](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
-| [aws_subnet.fleur-private-subnet](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/subnet) | resource |
-| [aws_subnet.fleur-public-subnet](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/subnet) | resource |
-| [aws_vpc.fleur-vpc](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc) | resource |
-| [postgresql_database.postgres](https://registry.terraform.io/providers/cyrilgdn/postgresql/latest/docs/resources/database) | resource |
-| [postgresql_grant.user_privileges](https://registry.terraform.io/providers/cyrilgdn/postgresql/latest/docs/resources/grant) | resource |
-| [postgresql_role.users](https://registry.terraform.io/providers/cyrilgdn/postgresql/latest/docs/resources/role) | resource |
-| [postgresql_schema.my_schema](https://registry.terraform.io/providers/cyrilgdn/postgresql/latest/docs/resources/schema) | resource |
-| [random_password.users_password](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/password) | resource |
-| [random_string.master_user_password](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/string) | resource |
-| [random_uuid.shapshot_postfix](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/uuid) | resource |
-| [archive_file.zip](https://registry.terraform.io/providers/hashicorp/archive/latest/docs/data-sources/file) | data source |
-| [aws_availability_zones.fleur-zone](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/availability_zones) | data source |
-| [aws_caller_identity.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/caller_identity) | data source |
-| [aws_iam_policy_document.policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
+| [aws_security_group.lb](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
+| [aws_region.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/region) | data source |
+| [aws_route53_zone.zone](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/route53_zone) | data source |
+| [template_file.ecs_s3_write_policy](https://registry.terraform.io/providers/hashicorp/template/latest/docs/data-sources/file) | data source |
+| [terraform_remote_state.operational_environment](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/data-sources/remote_state) | data source |
+| [terraform_remote_state.recipe_db_cluster_secrets](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/data-sources/remote_state) | data source |
 
 ## Inputs
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_allocated_storage"></a> [allocated\_storage](#input\_allocated\_storage) | The allocated storage in gigabytes | `string` | `null` | no |
-| <a name="input_allow_major_version_upgrade"></a> [allow\_major\_version\_upgrade](#input\_allow\_major\_version\_upgrade) | Indicates that major version upgrades are allowed. Changing this parameter does not result in an outage and the change is asynchronously applied as soon as possible | `bool` | `false` | no |
-| <a name="input_application_owner"></a> [application\_owner](#input\_application\_owner) | Email Group for the Application owner. | `string` | `"hqr-feedback-and-support-product@bellese.io"` | no |
-| <a name="input_apply_immediately"></a> [apply\_immediately](#input\_apply\_immediately) | Specifies whether any database modifications are applied immediately, or during the next maintenance window | `bool` | `false` | no |
-| <a name="input_auto_minor_version_upgrade"></a> [auto\_minor\_version\_upgrade](#input\_auto\_minor\_version\_upgrade) | Indicates that minor engine upgrades will be applied automatically to the DB instance during the maintenance window | `bool` | `true` | no |
-| <a name="input_availability_zone"></a> [availability\_zone](#input\_availability\_zone) | The Availability Zone of the RDS instance | `string` | `null` | no |
+| <a name="input_ado"></a> [ado](#input\_ado) | HIDS ADO that owns the resource. The ServiceNow Contracts table is the system of record for the actual ADO names and LOB names. | `string` | `"Kojitechs"` | no |
+| <a name="input_application"></a> [application](#input\_application) | Logical name for the application. Mainly used for kojitechs. For an ADO/LOB owned application default to the LOB name. | `string` | `"aws_eks"` | no |
+| <a name="input_application_owner"></a> [application\_owner](#input\_application\_owner) | Email Address of the group who owns the application. This should be a distribution list and no an individual email if at all possible. Primarily used for Ventech-owned applications to indicate what group/department is responsible for the application using this resource. For an ADO/LOB owned application default to the LOB name. | `string` | `"kojitechs@gmail.com"` | no |
+| <a name="input_aws_account_id"></a> [aws\_account\_id](#input\_aws\_account\_id) | Environment this template would be deployed to | `map(string)` | `{}` | no |
 | <a name="input_aws_region"></a> [aws\_region](#input\_aws\_region) | AWS Region. | `string` | `"us-east-1"` | no |
-| <a name="input_backup_retention_period"></a> [backup\_retention\_period](#input\_backup\_retention\_period) | The days to retain backups for | `number` | `null` | no |
-| <a name="input_backup_window"></a> [backup\_window](#input\_backup\_window) | The daily time range (in UTC) during which automated backups are created if they are enabled. Example: '09:46-10:16'. Must not overlap with maintenance\_window | `string` | `null` | no |
-| <a name="input_builder"></a> [builder](#input\_builder) | Email for the builder of this infrastructure | `string` | `"hqr-devops@bellese.io"` | no |
-| <a name="input_ca_cert_identifier"></a> [ca\_cert\_identifier](#input\_ca\_cert\_identifier) | Specifies the identifier of the CA certificate for the DB instance | `string` | `null` | no |
-| <a name="input_cell_name"></a> [cell\_name](#input\_cell\_name) | Name of the cell. | `string` | `"reporting-frontend"` | no |
-| <a name="input_character_set_name"></a> [character\_set\_name](#input\_character\_set\_name) | (Optional) The character set name to use for DB encoding in Oracle instances. This can't be changed. See Oracle Character Sets Supported in Amazon RDS and Collations and Character Sets for Microsoft SQL Server for more information. This can only be set on creation. | `string` | `null` | no |
-| <a name="input_component_name"></a> [component\_name](#input\_component\_name) | Name of the component. | `string` | `"aws-eksnginx"` | no |
-| <a name="input_container_image_source"></a> [container\_image\_source](#input\_container\_image\_source) | Where to fetch the container image. ecr or dockerhub | `string` | `"ecr"` | no |
-| <a name="input_container_image_version"></a> [container\_image\_version](#input\_container\_image\_version) | Version of the container image to deploy. | `string` | n/a | yes |
-| <a name="input_container_port"></a> [container\_port](#input\_container\_port) | Port that this service will listen on. | `number` | `"80"` | no |
-| <a name="input_copy_tags_to_snapshot"></a> [copy\_tags\_to\_snapshot](#input\_copy\_tags\_to\_snapshot) | On delete, copy all Instance tags to the final snapshot (if final\_snapshot\_identifier is specified) | `bool` | `false` | no |
-| <a name="input_count_jenkins_agents"></a> [count\_jenkins\_agents](#input\_count\_jenkins\_agents) | n/a | `number` | `2` | no |
-| <a name="input_create_db_instance"></a> [create\_db\_instance](#input\_create\_db\_instance) | Whether to create a database instance | `bool` | `true` | no |
-| <a name="input_create_db_option_group"></a> [create\_db\_option\_group](#input\_create\_db\_option\_group) | (Optional) Create a database option group | `bool` | `true` | no |
-| <a name="input_create_db_parameter_group"></a> [create\_db\_parameter\_group](#input\_create\_db\_parameter\_group) | Whether to create a database parameter group | `bool` | `true` | no |
-| <a name="input_create_db_subnet_group"></a> [create\_db\_subnet\_group](#input\_create\_db\_subnet\_group) | Whether to create a database subnet group | `bool` | `true` | no |
-| <a name="input_create_monitoring_role"></a> [create\_monitoring\_role](#input\_create\_monitoring\_role) | Create IAM role with a defined name that permits RDS to send enhanced monitoring metrics to CloudWatch Logs. | `bool` | `false` | no |
-| <a name="input_create_random_password"></a> [create\_random\_password](#input\_create\_random\_password) | Whether to create random password for RDS primary cluster | `bool` | `false` | no |
-| <a name="input_create_vpc"></a> [create\_vpc](#input\_create\_vpc) | Controls if VPC should be created (it affects almost all resources) | `bool` | `true` | no |
-| <a name="input_cross_region_replica"></a> [cross\_region\_replica](#input\_cross\_region\_replica) | Specifies if the replica should be cross region. It allows the use of a subnet group in a region different than the master instance | `bool` | `false` | no |
-| <a name="input_databases_created"></a> [databases\_created](#input\_databases\_created) | List of all databases Created!!! | `list(string)` | <pre>[<br>  "my_db1",<br>  "cypress_test"<br>]</pre> | no |
-| <a name="input_db_clusters"></a> [db\_clusters](#input\_db\_clusters) | The AWS DB cluster reference | `map(any)` | <pre>{<br>  "dbname": "cypress_app",<br>  "engine": "postgres",<br>  "identifier": "hqr-database-reporting",<br>  "name": "cypress_app",<br>  "port": 5432<br>}</pre> | no |
-| <a name="input_db_initial_id"></a> [db\_initial\_id](#input\_db\_initial\_id) | database initail id | `string` | `"Blesses#default"` | no |
-| <a name="input_db_instance_tags"></a> [db\_instance\_tags](#input\_db\_instance\_tags) | Additional tags for the DB instance | `map(string)` | `{}` | no |
-| <a name="input_db_option_group_tags"></a> [db\_option\_group\_tags](#input\_db\_option\_group\_tags) | Additional tags for the DB option group | `map(string)` | `{}` | no |
-| <a name="input_db_parameter_group_tags"></a> [db\_parameter\_group\_tags](#input\_db\_parameter\_group\_tags) | Additional tags for the  DB parameter group | `map(string)` | `{}` | no |
-| <a name="input_db_storage"></a> [db\_storage](#input\_db\_storage) | n/a | `string` | `300` | no |
-| <a name="input_db_subnet_group"></a> [db\_subnet\_group](#input\_db\_subnet\_group) | hqr db subnet group | `bool` | `true` | no |
-| <a name="input_db_subnet_group_description"></a> [db\_subnet\_group\_description](#input\_db\_subnet\_group\_description) | Description of the DB subnet group to create | `string` | `""` | no |
-| <a name="input_db_subnet_group_name"></a> [db\_subnet\_group\_name](#input\_db\_subnet\_group\_name) | Name of DB subnet group. DB instance will be created in the VPC associated with the DB subnet group. If unspecified, will be created in the default VPC | `string` | `null` | no |
-| <a name="input_db_subnet_group_tags"></a> [db\_subnet\_group\_tags](#input\_db\_subnet\_group\_tags) | Additional tags for the DB subnet group | `map(string)` | `{}` | no |
-| <a name="input_db_subnet_group_use_name_prefix"></a> [db\_subnet\_group\_use\_name\_prefix](#input\_db\_subnet\_group\_use\_name\_prefix) | Determines whether to use `subnet_group_name` as is or create a unique name beginning with the `subnet_group_name` as the prefix | `bool` | `true` | no |
-| <a name="input_db_users"></a> [db\_users](#input\_db\_users) | List of all databases | `list(any)` | `[]` | no |
-| <a name="input_db_users_privileges"></a> [db\_users\_privileges](#input\_db\_users\_privileges) | If a user in this map does not also exist in the db\_users list, it will be ignored.<br>Example usage of db\_users:<pre>db_users_privileges = [<br>  {<br>    database  = "EXAMPLE POSTGRES"<br>    user       = “example_user1"<br>    type  = “example_type1”<br>    schema     = "example_schema1"<br>    privileges = ["SELECT", "INSERT", "UPDATE", "DELETE"]<br>    objects    = [“example_object”]<br>  },<br>  {<br>    database  = "EXAMPLE POSTGRES"<br>    user       = “example_user2"<br>    type       = “example_type2”<br>    schema     = “example_schema2"<br>    privileges = [“SELECT”]<br>    objects    = []<br>  }<br>]</pre>Note: An empty objects list applies the privilege on all database objects matching the type provided.<br>For information regarding types and privileges, refer to: https://www.postgresql.org/docs/13/ddl-priv.html | <pre>list(object({<br>    user       = string<br>    type       = string<br>    schema     = string<br>    privileges = list(string)<br>    objects    = list(string)<br>    database   = string<br>  }))</pre> | `[]` | no |
-| <a name="input_delete_automated_backups"></a> [delete\_automated\_backups](#input\_delete\_automated\_backups) | Specifies whether to remove automated backups immediately after the DB instance is deleted | `bool` | `true` | no |
-| <a name="input_deletion_protection"></a> [deletion\_protection](#input\_deletion\_protection) | The database can't be deleted when this value is set to true. | `bool` | `false` | no |
-| <a name="input_domain"></a> [domain](#input\_domain) | The ID of the Directory Service Active Directory domain to create the instance in | `string` | `null` | no |
-| <a name="input_domain_iam_role_name"></a> [domain\_iam\_role\_name](#input\_domain\_iam\_role\_name) | (Required if domain is provided) The name of the IAM role to be used when making API calls to the Directory Service | `string` | `null` | no |
+| <a name="input_builder"></a> [builder](#input\_builder) | The name of the person who created the resource. | `string` | `"kojitechs@gmail.com"` | no |
+| <a name="input_cell_name"></a> [cell\_name](#input\_cell\_name) | The name of the cell. | `string` | `"TECH-GLOBAL"` | no |
+| <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | Name of the ECS cluster to deploy the service into. | `string` | `"recipe-api"` | no |
+| <a name="input_component_name"></a> [component\_name](#input\_component\_name) | Name of the component. | `string` | `"api-recipe"` | no |
+| <a name="input_container_name"></a> [container\_name](#input\_container\_name) | n/a | `string` | `"recipe-app-api-devops"` | no |
+| <a name="input_container_port"></a> [container\_port](#input\_container\_port) | Port that this service will listen on. | `number` | `"9000"` | no |
+| <a name="input_django_secret_key"></a> [django\_secret\_key](#input\_django\_secret\_key) | Secret key for Django app | `any` | n/a | yes |
+| <a name="input_dns_zone_name"></a> [dns\_zone\_name](#input\_dns\_zone\_name) | Domain name | `any` | n/a | yes |
 | <a name="input_ecs_service_desired_count"></a> [ecs\_service\_desired\_count](#input\_ecs\_service\_desired\_count) | Number of tasks to launch in the ECS service. | `number` | `1` | no |
-| <a name="input_enable_classiclink"></a> [enable\_classiclink](#input\_enable\_classiclink) | Should be true to enable ClassicLink for the VPC. Only valid in regions and accounts that support EC2 Classic. | `bool` | `null` | no |
-| <a name="input_enable_classiclink_dns_support"></a> [enable\_classiclink\_dns\_support](#input\_enable\_classiclink\_dns\_support) | Should be true to enable ClassicLink DNS Support for the VPC. Only valid in regions and accounts that support EC2 Classic. | `bool` | `null` | no |
-| <a name="input_enable_dns_hostnames"></a> [enable\_dns\_hostnames](#input\_enable\_dns\_hostnames) | Should be true to enable DNS hostnames in the VPC | `bool` | `true` | no |
-| <a name="input_enable_dns_support"></a> [enable\_dns\_support](#input\_enable\_dns\_support) | Should be true to enable DNS support in the VPC | `bool` | `true` | no |
-| <a name="input_enabled_cloudwatch_logs_exports"></a> [enabled\_cloudwatch\_logs\_exports](#input\_enabled\_cloudwatch\_logs\_exports) | List of log types to enable for exporting to CloudWatch logs. If omitted, no logs will be exported. Valid values (depending on engine): alert, audit, error, general, listener, slowquery, trace, postgresql (PostgreSQL), upgrade (PostgreSQL). | `list(string)` | `[]` | no |
-| <a name="input_engine"></a> [engine](#input\_engine) | The database engine to use | `string` | `"postgres"` | no |
-| <a name="input_engine_version"></a> [engine\_version](#input\_engine\_version) | Hqr postgres db version | `string` | `"9.6"` | no |
-| <a name="input_engine_versionn"></a> [engine\_versionn](#input\_engine\_versionn) | The engine version to use | `string` | `null` | no |
-| <a name="input_family"></a> [family](#input\_family) | The family of the DB parameter group | `string` | `""` | no |
-| <a name="input_fargate_cpu"></a> [fargate\_cpu](#input\_fargate\_cpu) | Fargate instance CPU units to provision (1 vCPU = 1024 CPU units) | `string` | `"1024"` | no |
-| <a name="input_fargate_memory"></a> [fargate\_memory](#input\_fargate\_memory) | Fargate instance memory to provision (in MiB) | `string` | `"2048"` | no |
-| <a name="input_final_snapshot_identifier"></a> [final\_snapshot\_identifier](#input\_final\_snapshot\_identifier) | The name of your final DB snapshot when this DB instance is deleted. | `string` | `null` | no |
-| <a name="input_final_snapshot_identifier_prefix"></a> [final\_snapshot\_identifier\_prefix](#input\_final\_snapshot\_identifier\_prefix) | The name which is prefixed to the final snapshot on cluster destroy | `string` | `"final"` | no |
-| <a name="input_fleur-cidr-block"></a> [fleur-cidr-block](#input\_fleur-cidr-block) | n/a | `string` | `"150.0.0.0/16"` | no |
-| <a name="input_iam_database_authentication_enabled"></a> [iam\_database\_authentication\_enabled](#input\_iam\_database\_authentication\_enabled) | Specifies whether or not the mappings of AWS Identity and Access Management (IAM) accounts to database accounts are enabled | `bool` | `false` | no |
-| <a name="input_identifie"></a> [identifie](#input\_identifie) | The name of the RDS instance, if omitted, Terraform will assign a random, unique identifier | `string` | `""` | no |
-| <a name="input_identifier"></a> [identifier](#input\_identifier) | hqr database identifier | `string` | `"fleur_dbinstance"` | no |
-| <a name="input_instance_class"></a> [instance\_class](#input\_instance\_class) | hqr db instance class | `string` | `"db.m4.large"` | no |
-| <a name="input_iops"></a> [iops](#input\_iops) | The amount of provisioned IOPS. Setting this implies a storage\_type of 'io1' | `number` | `0` | no |
-| <a name="input_jenkins_port"></a> [jenkins\_port](#input\_jenkins\_port) | n/a | `number` | `8080` | no |
-| <a name="input_kms_key_id"></a> [kms\_key\_id](#input\_kms\_key\_id) | The ARN for the KMS encryption key. If creating an encrypted replica, set this to the destination KMS ARN. If storage\_encrypted is set to true and kms\_key\_id is not specified the default KMS key created in your account will be used | `string` | `null` | no |
-| <a name="input_lambda_function_name"></a> [lambda\_function\_name](#input\_lambda\_function\_name) | Name of the lambda function | `string` | `"lambda_function_for_secrets_rotation"` | no |
-| <a name="input_lb_listener_path"></a> [lb\_listener\_path](#input\_lb\_listener\_path) | Path that will be used to route traffic from the load balancer to the ECS service. | `string` | `"/index.html/*"` | no |
-| <a name="input_license_model"></a> [license\_model](#input\_license\_model) | License model information for this DB instance. Optional, but required for some DB engines, i.e. Oracle SE1 | `string` | `null` | no |
-| <a name="input_maintenance_window"></a> [maintenance\_window](#input\_maintenance\_window) | The window to perform maintenance in. Syntax: 'ddd:hh24:mi-ddd:hh24:mi'. Eg: 'Mon:00:00-Mon:03:00' | `string` | `null` | no |
-| <a name="input_major_engine_version"></a> [major\_engine\_version](#input\_major\_engine\_version) | Specifies the major version of the engine that this option group should be associated with | `string` | `"10.6"` | no |
-| <a name="input_map-public-ip"></a> [map-public-ip](#input\_map-public-ip) | n/a | `bool` | `true` | no |
-| <a name="input_max_allocated_storage"></a> [max\_allocated\_storage](#input\_max\_allocated\_storage) | Specifies the value for Storage Autoscaling | `number` | `0` | no |
-| <a name="input_monitoring_interval"></a> [monitoring\_interval](#input\_monitoring\_interval) | The interval, in seconds, between points when Enhanced Monitoring metrics are collected for the DB instance. To disable collecting Enhanced Monitoring metrics, specify 0. The default is 0. Valid Values: 0, 1, 5, 10, 15, 30, 60. | `number` | `0` | no |
-| <a name="input_monitoring_role_arn"></a> [monitoring\_role\_arn](#input\_monitoring\_role\_arn) | The ARN for the IAM role that permits RDS to send enhanced monitoring metrics to CloudWatch Logs. Must be specified if monitoring\_interval is non-zero. | `string` | `null` | no |
-| <a name="input_monitoring_role_description"></a> [monitoring\_role\_description](#input\_monitoring\_role\_description) | Description of the monitoring IAM role | `string` | `null` | no |
-| <a name="input_monitoring_role_name"></a> [monitoring\_role\_name](#input\_monitoring\_role\_name) | Name of the IAM role which will be created when create\_monitoring\_role is enabled. | `string` | `"rds-monitoring-role"` | no |
-| <a name="input_multi_az"></a> [multi\_az](#input\_multi\_az) | Enable multity az for hqr db instance | `bool` | `true` | no |
-| <a name="input_name"></a> [name](#input\_name) | The DB name to create. If omitted, no database is created initially | `string` | `null` | no |
-| <a name="input_name_prefix"></a> [name\_prefix](#input\_name\_prefix) | Name prefix for secrets rotaion | `string` | `"hqr-database-reporting"` | no |
-| <a name="input_option_group_description"></a> [option\_group\_description](#input\_option\_group\_description) | The description of the option group | `string` | `""` | no |
-| <a name="input_option_group_name"></a> [option\_group\_name](#input\_option\_group\_name) | Name of the option group | `string` | `null` | no |
-| <a name="input_option_group_timeouts"></a> [option\_group\_timeouts](#input\_option\_group\_timeouts) | Define maximum timeout for deletion of `aws_db_option_group` resource | `map(string)` | <pre>{<br>  "delete": "15m"<br>}</pre> | no |
-| <a name="input_option_group_use_name_prefix"></a> [option\_group\_use\_name\_prefix](#input\_option\_group\_use\_name\_prefix) | Determines whether to use `option_group_name` as is or create a unique name beginning with the `option_group_name` as the prefix | `bool` | `true` | no |
-| <a name="input_options"></a> [options](#input\_options) | A list of Options to apply. | `any` | `[]` | no |
-| <a name="input_parameter_group_description"></a> [parameter\_group\_description](#input\_parameter\_group\_description) | Description of the DB parameter group to create | `string` | `""` | no |
-| <a name="input_parameter_group_name"></a> [parameter\_group\_name](#input\_parameter\_group\_name) | Name of the DB parameter group to associate or create | `string` | `null` | no |
-| <a name="input_parameter_group_use_name_prefix"></a> [parameter\_group\_use\_name\_prefix](#input\_parameter\_group\_use\_name\_prefix) | Determines whether to use `parameter_group_name` as is or create a unique name beginning with the `parameter_group_name` as the prefix | `bool` | `true` | no |
-| <a name="input_parameters"></a> [parameters](#input\_parameters) | A list of DB parameters (map) to apply | `list(map(string))` | `[]` | no |
-| <a name="input_password"></a> [password](#input\_password) | Password for the master DB user. Note that this may show up in logs, and it will be stored in the state file | `string` | `""` | no |
-| <a name="input_performance_insights_enabled"></a> [performance\_insights\_enabled](#input\_performance\_insights\_enabled) | Specifies whether Performance Insights are enabled | `bool` | `false` | no |
-| <a name="input_performance_insights_kms_key_id"></a> [performance\_insights\_kms\_key\_id](#input\_performance\_insights\_kms\_key\_id) | The ARN for the KMS key to encrypt Performance Insights data. | `string` | `null` | no |
-| <a name="input_performance_insights_retention_period"></a> [performance\_insights\_retention\_period](#input\_performance\_insights\_retention\_period) | The amount of time in days to retain Performance Insights data. Either 7 (7 days) or 731 (2 years). | `number` | `7` | no |
-| <a name="input_port"></a> [port](#input\_port) | The port on which the DB accepts connections | `string` | `null` | no |
-| <a name="input_private-subnet"></a> [private-subnet](#input\_private-subnet) | n/a | `list(any)` | <pre>[<br>  "hqr-backend-sub1",<br>  "hqr-backend-sub2",<br>  "hqr-backend-sub3",<br>  "hqr-backend-sub4"<br>]</pre> | no |
-| <a name="input_public-subnet"></a> [public-subnet](#input\_public-subnet) | n/a | `list(any)` | <pre>[<br>  "hqr-fronend-sub1",<br>  "hqr-fronend-sub2",<br>  "hqr-fronend-sub3",<br>  "hqr-fronend-sub4"<br>]</pre> | no |
-| <a name="input_publicly_accessible"></a> [publicly\_accessible](#input\_publicly\_accessible) | Bool to control if instance is publicly accessible | `bool` | `false` | no |
-| <a name="input_random_password_length"></a> [random\_password\_length](#input\_random\_password\_length) | (Optional) Length of random password to create. (default: 10) | `number` | `10` | no |
-| <a name="input_region"></a> [region](#input\_region) | n/a | `string` | `"us-east-1"` | no |
-| <a name="input_replicate_source_db"></a> [replicate\_source\_db](#input\_replicate\_source\_db) | Specifies that this resource is a Replicate database, and to use this value as the source database. This correlates to the identifier of another Amazon RDS Database to replicate. | `string` | `null` | no |
-| <a name="input_restore_to_point_in_time"></a> [restore\_to\_point\_in\_time](#input\_restore\_to\_point\_in\_time) | Restore to a point in time (MySQL is NOT supported) | `map(string)` | `null` | no |
-| <a name="input_s3_import"></a> [s3\_import](#input\_s3\_import) | Restore from a Percona Xtrabackup in S3 (only MySQL is supported) | `map(string)` | `null` | no |
-| <a name="input_schemas_list_owners"></a> [schemas\_list\_owners](#input\_schemas\_list\_owners) | If a schemas in this map does not also exist in the onwers list, it will be ignored.<br>Example usage of schemas:<pre>schemas = [<br>  {<br>    database   = "postgres"<br>    name_of_theschema = "EXAMPLE_PUBLIC"<br>    onwer = "EXAMPLE_POSTGRES"<br>    policy {<br>      usage = true/false # yes to grant usage on schema<br>      role = "ROLE/USER" # The role/user to which this schema would be granted access to<br>    }<br>      # app_releng can create new objects in the schema.  This is the role that<br>       # migrations are executed as.<br>    policy {<br>    with_create_object = true/false<br>    with_usage = true/false<br>    role_name  = "postgres" if false null<br>}<br>    ]</pre>Note: An empty objects list applies the privilege on all database objects matching the type provided.<br>For information regarding types and privileges, refer to: https://www.postgresql.org/docs/13/ddl-priv.html | <pre>list(object({<br>    database           = string<br>    name_of_theschema  = string<br>    onwer              = string<br>    usage              = bool<br>    role               = string<br>    with_create_object = bool<br>    with_usage         = bool<br>    role_name          = string<br>  }))</pre> | n/a | yes |
-| <a name="input_service_name"></a> [service\_name](#input\_service\_name) | Name of the service. | `string` | `"reporting"` | no |
+| <a name="input_line_of_business"></a> [line\_of\_business](#input\_line\_of\_business) | HIDS LOB that owns the resource. | `string` | `"TECH"` | no |
 | <a name="input_service_tier"></a> [service\_tier](#input\_service\_tier) | Tier to deploy the service into. APP, WEB, or DATA | `string` | `"WEB"` | no |
-| <a name="input_skip_db_snapshot"></a> [skip\_db\_snapshot](#input\_skip\_db\_snapshot) | skip snaption for hqr db instance | `string` | `true` | no |
-| <a name="input_skip_final_snapshot"></a> [skip\_final\_snapshot](#input\_skip\_final\_snapshot) | Determines whether a final DB snapshot is created before the DB instance is deleted. If true is specified, no DBSnapshot is created. If false is specified, a DB snapshot is created before the DB instance is deleted, using the value from final\_snapshot\_identifier | `bool` | `false` | no |
-| <a name="input_slack_channel"></a> [slack\_channel](#input\_slack\_channel) | Slack channel name | `string` | `"automation_channel"` | no |
-| <a name="input_slack_url"></a> [slack\_url](#input\_slack\_url) | url of slack | `string` | `"https://hooks.slack.com/services/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"` | no |
-| <a name="input_snapshot_identifier"></a> [snapshot\_identifier](#input\_snapshot\_identifier) | Specifies whether or not to create this database from a snapshot. This correlates to the snapshot ID you'd find in the RDS console, e.g: rds:production-2015-06-26-06-05. | `string` | `null` | no |
-| <a name="input_sonar_port"></a> [sonar\_port](#input\_sonar\_port) | n/a | `number` | `9000` | no |
-| <a name="input_storage_encrypted"></a> [storage\_encrypted](#input\_storage\_encrypted) | Specifies whether the DB instance is encrypted | `bool` | `false` | no |
-| <a name="input_storage_type"></a> [storage\_type](#input\_storage\_type) | One of 'standard' (magnetic), 'gp2' (general purpose SSD), or 'io1' (provisioned IOPS SSD). The default is 'io1' if iops is specified, 'gp2' if not. | `string` | `null` | no |
-| <a name="input_subnet_ids"></a> [subnet\_ids](#input\_subnet\_ids) | A list of VPC subnet IDs | `list(string)` | `[]` | no |
-| <a name="input_tags"></a> [tags](#input\_tags) | A mapping of tags to assign to all resources | `map(string)` | `{}` | no |
-| <a name="input_target_group_health_check_path"></a> [target\_group\_health\_check\_path](#input\_target\_group\_health\_check\_path) | Path that will be used to perform the health check of the ECS service. | `string` | `"/"` | no |
-| <a name="input_tech_poc_primary"></a> [tech\_poc\_primary](#input\_tech\_poc\_primary) | Primary Point of Contact for Technical support for this service. | `string` | `"hqr-feedback-and-support-product@bellese.io"` | no |
-| <a name="input_tech_poc_secondary"></a> [tech\_poc\_secondary](#input\_tech\_poc\_secondary) | Secondary Point of Contact for Technical support for this service. | `string` | `"hqr-devops@bellese.io"` | no |
-| <a name="input_tenable_user"></a> [tenable\_user](#input\_tenable\_user) | RDS Teneble users | `string` | `"postgres_aa2"` | no |
-| <a name="input_timeouts"></a> [timeouts](#input\_timeouts) | (Optional) Updated Terraform resource management timeouts. Applies to `aws_db_instance` in particular to permit resource management times | `map(string)` | <pre>{<br>  "create": "40m",<br>  "delete": "40m",<br>  "update": "80m"<br>}</pre> | no |
-| <a name="input_timezone"></a> [timezone](#input\_timezone) | (Optional) Time zone of the DB instance. timezone is currently only supported by Microsoft SQL Server. The timezone can only be set on creation. See MSSQL User Guide for more information. | `string` | `null` | no |
-| <a name="input_typ"></a> [typ](#input\_typ) | type | `bool` | `true` | no |
-| <a name="input_username"></a> [username](#input\_username) | Username for the master DB user | `string` | `null` | no |
-| <a name="input_vol_size"></a> [vol\_size](#input\_vol\_size) | n/a | `number` | `50` | no |
-| <a name="input_vpc_security_group_ids"></a> [vpc\_security\_group\_ids](#input\_vpc\_security\_group\_ids) | List of VPC security groups to associate | `list(string)` | `[]` | no |
+| <a name="input_subdomain"></a> [subdomain](#input\_subdomain) | Subdomain per environment | `map(string)` | <pre>{<br>  "prod": "api.prod",<br>  "sbx": "api.sbx",<br>  "shared": "api.shared"<br>}</pre> | no |
+| <a name="input_subject_alternative_names"></a> [subject\_alternative\_names](#input\_subject\_alternative\_names) | n/a | `list(any)` | n/a | yes |
+| <a name="input_target_group_health_check_path"></a> [target\_group\_health\_check\_path](#input\_target\_group\_health\_check\_path) | Path that will be used to perform the health check of the ECS service. | `string` | `"/admin/login/"` | no |
+| <a name="input_tech_poc_primary"></a> [tech\_poc\_primary](#input\_tech\_poc\_primary) | Email Address of the Primary Technical Contact for the AWS resource. | `string` | `"kojitechs@gmail.com"` | no |
+| <a name="input_tier"></a> [tier](#input\_tier) | Network tier or layer where the resource resides. These tiers are represented in every VPC regardless of single-tenant or multi-tenant. For most resources in the Infrastructure and Security VPC, the TIER will be Management. But in some cases,such as Atlassian, the other tiers are relevant. | `string` | `"APP"` | no |
+| <a name="input_vpc"></a> [vpc](#input\_vpc) | The VPC the resource resides in. We need this to differentiate from Lifecycle Environment due to INFRA and SEC. One of "APP", "INFRA", "SEC", "ROUTING". | `string` | `"APP"` | no |
 
 ## Outputs
 
-| Name | Description |
-|------|-------------|
-| <a name="output_db_passwd"></a> [db\_passwd](#output\_db\_passwd) | n/a |
-| <a name="output_lambda"></a> [lambda](#output\_lambda) | n/a |
-| <a name="output_secret_string"></a> [secret\_string](#output\_secret\_string) | n/a |
-| <a name="output_vpc_id"></a> [vpc\_id](#output\_vpc\_id) | n/a |
+No outputs.
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 
 ## Authors

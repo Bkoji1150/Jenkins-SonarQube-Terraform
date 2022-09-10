@@ -1,31 +1,23 @@
 
 locals {
-  cluster_name = var.cluster_name == null ? upper(format("HQR-%s-HOST", var.tier)) : var.cluster_name
+  cluster_name = aws_ecs_cluster.this.name
   network_configuration = var.container_launch_type == "FARGATE" ? [{
     subnets          = var.ecs_service_subnet_ids
     security_groups  = var.ecs_service_sg_ids
     assign_public_ip = var.assign_public_ip
   }] : []
   target_group_stickiness = var.target_group_stickiness == null ? [] : [var.target_group_stickiness]
-  # If we pass in a json key for a Secrets Manager secret, we need to strip it off for the IAM policy
+
   _container_secrets_arns = [for v in var.container_secrets : v.valueFrom]
   container_secrets = [
     for v in local._container_secrets_arns : length(split(":secret:", v)) > 1 ? join(":secret:", [split(":secret:", v)[0], split(":", split(":secret:", v)[1])[0]]) : v
   ]
 }
+resource "aws_ecs_cluster" "this" {
+  name = upper("${var.component_name}-cluster")
 
-data "aws_iam_policy_document" "task_execution_secrets_policy_document" {
-  dynamic "statement" {
-    for_each = local.container_secrets
-    content {
-      effect = "Allow"
-      actions = [
-        "ssm:GetParameters",
-        "secretsmanager:GetSecretValue",
-        "kms:Decrypt"
-      ]
-      resources = [statement.value]
-    }
+  tags = {
+    Name = upper("${var.component_name}-cluster")
   }
 }
 
@@ -44,23 +36,26 @@ data "aws_iam_policy_document" "ecs_task_execution_role" {
   }
 }
 
+resource "aws_iam_role" "iam_for_ecs" {
+  name_prefix        = "${var.component_name}-ecsRole"
+  assume_role_policy = data.aws_iam_policy_document.ecs_task_execution_role.json
+}
+
 resource "aws_iam_role_policy_attachment" "task_execution_role" {
   role       = aws_iam_role.iam_for_ecs.name
   policy_arn = aws_iam_policy.ecs.arn
 }
 
-resource "aws_iam_role" "iam_for_ecs" {
-  name_prefix        = "iam_for_ecs"
-  assume_role_policy = data.aws_iam_policy_document.ecs_task_execution_role.json
-}
-
 module "container_definition" {
-  source = "git::git@github.com:Bkoji1150/hqr-operational-enviroment.git//container-definition"
+  source = "../container-definition"
 
-  container_name               = var.container_name
-  container_image              = var.container_image
-  container_version            = var.container_image_version
-  container_source             = var.container_source
+  container_name = var.container_name
+  container_image = lower(var.container_image_source) == "ecr" ? format(
+    "%s.dkr.ecr.us-east-1.amazonaws.com/%s:%s",
+    var.ecr_account_id,
+    var.container_name,
+    var.container_version
+  ) : ""
   container_memory             = var.container_memory
   container_memory_reservation = var.container_memory_reservation
   port_mappings                = var.container_port_mappings
@@ -89,12 +84,12 @@ module "container_definition" {
   start_timeout                = var.container_start_timeout
   stop_timeout                 = var.container_stop_timeout
   system_controls              = var.container_system_controls
-  ecr_account_id               = var.ecr_account_id
+
 }
 
 resource "aws_ecs_task_definition" "task_definition" {
 
-  family                   = var.cfqn_name
+  family                   = var.ecs_service_name
   container_definitions    = module.container_definition.json
   cpu                      = var.task_cpu
   memory                   = var.task_memory
@@ -103,27 +98,32 @@ resource "aws_ecs_task_definition" "task_definition" {
   execution_role_arn       = aws_iam_role.iam_for_ecs.arn
   task_role_arn            = var.task_definition_task_role_arn
 
-  dynamic "volume" {
 
-    for_each = var.container_volumes
-    content {
-      name = volume.value.name
-      efs_volume_configuration {
-        file_system_id     = volume.value.efs_volume_configuration.file_system_id
-        root_directory     = volume.value.efs_volume_configuration.root_directory
-        transit_encryption = volume.value.efs_volume_configuration.transit_encryption
-        authorization_config {
-          access_point_id = volume.value.efs_volume_configuration.authorization_config.access_point_id
-          iam             = volume.value.efs_volume_configuration.authorization_config.iam
-        }
-      }
-
-    }
+  volume {
+    name = "static"
   }
+
+  # dynamic "volume" {
+
+  #   for_each = var.container_volumes
+  #   content {
+  #     name = volume.value.name
+  #     efs_volume_configuration {
+  #       file_system_id     = volume.value.efs_volume_configuration.file_system_id
+  #       root_directory     = volume.value.efs_volume_configuration.root_directory
+  #       transit_encryption = volume.value.efs_volume_configuration.transit_encryption
+  #       authorization_config {
+  #         access_point_id = volume.value.efs_volume_configuration.authorization_config.access_point_id
+  #         iam             = volume.value.efs_volume_configuration.authorization_config.iam
+  #       }
+  #     }
+
+  #   }
+  # }
 }
 
 resource "aws_ecs_service" "ecs_service" {
-  name                               = var.cfqn_name
+  name                               = var.ecs_service_name
   cluster                            = local.cluster_name
   task_definition                    = aws_ecs_task_definition.task_definition.arn
   desired_count                      = var.ecs_service_desired_count
@@ -155,7 +155,8 @@ resource "aws_ecs_service" "ecs_service" {
 }
 
 resource "aws_lb_target_group" "target_group" {
-  count                         = var.create_target_group ? 1 : 0
+  count = var.create_target_group ? 1 : 0
+
   name                          = lower(format("%s-tg", substr(var.component_name, 0, 29)))
   vpc_id                        = var.vpc_id
   port                          = var.container_port
@@ -186,8 +187,10 @@ resource "aws_lb_target_group" "target_group" {
     create_before_destroy = true
   }
 }
+
 resource "aws_lb_listener_rule" "cell_lb_listener_rule" {
-  count        = var.create_listener_rule ? 1 : 0
+  count = var.create_listener_rule ? 1 : 0
+
   listener_arn = var.lb_listener_arn
   action {
     target_group_arn = coalesce(var.target_group_arn, aws_lb_target_group.target_group[*].arn...)
@@ -212,7 +215,7 @@ resource "aws_cloudwatch_metric_alarm" "container_cpu" {
   comparison_operator = "GreaterThanThreshold"
   dimensions = {
     cluster_name = local.cluster_name
-    service_name = var.cfqn_name
+    service_name = var.ecs_service_name
   }
 }
 
@@ -243,7 +246,7 @@ resource "aws_cloudwatch_metric_alarm" "container_memory_utilization" {
   comparison_operator = "GreaterThanThreshold"
   dimensions = {
     cluster_name = local.cluster_name
-    service_name = var.cfqn_name
+    service_name = var.ecs_service_name
   }
 }
 
